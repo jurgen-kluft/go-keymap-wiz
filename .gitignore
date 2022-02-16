@@ -1,4 +1,20 @@
-.idea
-.DS_Store
+#ignore all files
+*
+!*/
 
-calculator
+#except the following files
+!.gitignore
+!.clang-format
+!go.mod
+!go.sum
+!*.def
+!*.go
+
+!*.md
+!*.jpg
+!*.png
+!*.svg
+!*.txt
+!*.json
+
+#except the following folders
