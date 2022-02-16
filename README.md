@@ -3,7 +3,7 @@
 A simple keymap editor built using the Fyne toolkit.
 
 State:
--> Design
+- -> Design (currently here)
 - Implement custom key widget
 - Implement custom layout
 - Implement property window
