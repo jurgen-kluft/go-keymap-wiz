@@ -1,6 +1,6 @@
 # QMK Keymap Editor
 
-A simple keymap editor built using the Fyne toolkit.
+A QMK keymap editor that can export keymap.c, layers.h and possibly update your config.h and rules.mk files.
 
 State:
 - -> Design (currently here)

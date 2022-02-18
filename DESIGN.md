@@ -1,5 +1,14 @@
 # Design
 
+Language & Framework
+
+- C/C++ and ImGUI (Hello ImGUI; https://github.com/pthom/hello_imgui)
+
+Links:
+- https://github.com/cryham/ckeys (keyboard layout app)
+- https://github.com/mnesarco/bawr (fonts, icons, svg)
+
+
 General Idea (follow ZSA Oryx):
 
 - Create a new layout object that can handle keyboard layouts (data driven)
