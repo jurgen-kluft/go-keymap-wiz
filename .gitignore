@@ -2,19 +2,35 @@
 *
 !*/
 
+target/
+tags
+
 #except the following files
 !.gitignore
 !.clang-format
-!go.mod
-!go.sum
-!*.def
+!*.cpp
+!*.hpp
+!*.c
+!*.h
+!*.inl
+
+!*.build
+
 !*.go
+
+!*.cs
+!*.csproj
+!*.resx
+
+!*.hlsl
+!*.fragment
 
 !*.md
 !*.jpg
-!*.png
-!*.svg
 !*.txt
-!*.json
+!*.html
+
+!*.ini
+!*.bat
 
 #except the following folders
