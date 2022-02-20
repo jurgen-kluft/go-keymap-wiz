@@ -25,7 +25,6 @@ func GetPackage() *denv.Package {
 
 	// 'qmk-keymap-wiz' library
 	mainapp := denv.SetupDefaultCppAppProject("qmk-keymap-wiz", "github.com\\jurgen-kluft\\qmk-keymap-wiz")
-	mainapp.AddDefaultCocoa()
 
 	mainapp.Dependencies = append(mainapp.Dependencies, xentrypkg.GetMainLib())
 	mainapp.Dependencies = append(mainapp.Dependencies, xbasepkg.GetMainLib())
