@@ -7,7 +7,8 @@ Language & Framework
 Links:
 - https://github.com/cryham/ckeys (keyboard layout app)
 - https://github.com/mnesarco/bawr (fonts, icons, svg)
-
+- https://github.com/zserge/jsmn (json parser for C/C++)
+- https://github.com/ijprest/kle-serial/blob/master/index.ts (format of json exported by keyboard-layout-editor.com)
 
 General Idea (follow ZSA Oryx):
 
