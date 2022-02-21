@@ -30,7 +30,4 @@ tags
 !*.txt
 !*.html
 
-!*.ini
-!*.bat
-
 #except the following folders
