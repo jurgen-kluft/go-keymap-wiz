@@ -51,19 +51,21 @@ typedef struct jsmn_parser
     unsigned int pos;      /* offset in the JSON string */
     unsigned int toknext;  /* next token to allocate */
     int          toksuper; /* superior token node, e.g. parent object or array */
+    jsmntok_t*   tokens;
+    unsigned int max_tokens;
 } jsmn_parser;
 
 /**
  * Create JSON parser over an array of tokens
  */
-void jsmn_init(jsmn_parser* parser);
+void jsmn_init(jsmn_parser* parser, jsmntok_t* tokens, unsigned int max_tokens);
 
 /**
  * Run JSON parser. It parses a JSON data string into and array of tokens, each
  * describing
  * a single JSON object.
  */
-int jsmn_parse(jsmn_parser* parser, const char* js, const size_t len, jsmntok_t* tokens, const unsigned int num_tokens);
+int jsmn_parse(jsmn_parser* parser, const char* js, const size_t len);
 
 
 #endif // __JSMN_H__
