@@ -139,6 +139,7 @@ int main(int, char**)
             static int   counter = 0;
 
             ImGui::Begin("Keyboard Wiz");
+            ImVec2 wp = ImGui::GetWindowPos();
 
             float key_width  = 60.0f;
             float key_height = 50.0f;
@@ -154,39 +155,57 @@ int main(int, char**)
             float kx = offset_x;
             float ky = offset_y;
 
+            ImVec4 colf = ImVec4(1.0f, 1.0f, 0.4f, 1.0f);
+            ImU32 col = ImColor(colf);
+            float rounding = 10.0f;
+            float th = 1.0f;
+
 			ImGui::BeginGroup();
+            ImDrawList* draw_list = ImGui::GetWindowDrawList();
+            const ImVec2 p = wp;
+
             ImGui::SetCursorPos(ImVec2(kx, ky));
             if (ImGui::Button("Q", ImVec2(key_width, key_height)))
                 counter++;
+            draw_list->AddRect(ImVec2(p.x+kx,p.y+ky), ImVec2(p.x+kx + key_width, p.y+ky + key_height), col, rounding, ImDrawFlags_None, th);  // Square with all rounded corners
+
 			ImGui::SetCursorPos(ImVec2(kx, ky + key_height + key_spacing_y));
 			if (ImGui::Button("A", ImVec2(key_width, key_height)))
 				counter++;
+            draw_list->AddRect(ImVec2(p.x+kx,p.y+ky), ImVec2(p.x+kx + key_width, p.y+ky + key_height), col, rounding, ImDrawFlags_None, th);  // Square with all rounded corners
+
 			ImGui::SetCursorPos(ImVec2(kx, ky + 2.0f * (key_height + key_spacing_y)));
 			if (ImGui::Button("Z", ImVec2(key_width, key_height)))
 				counter++;
+            draw_list->AddRect(ImVec2(p.x+kx,p.y+ky), ImVec2(p.x+kx + key_width, p.y+ky + key_height), col, rounding, ImDrawFlags_None, th);  // Square with all rounded corners
 
 			kx += key_width + key_spacing_x;
             ImGui::SetCursorPos(ImVec2(kx, ky));
 
             if (ImGui::Button("W", ImVec2(key_width, key_height)))
                 counter++;
+            draw_list->AddRect(ImVec2(p.x+kx,p.y+ky), ImVec2(p.x+kx + key_width, p.y+ky + key_height), col, rounding, ImDrawFlags_None, th);  // Square with all rounded corners
+
             kx += key_width + key_spacing_x;
             ImGui::SetCursorPos(ImVec2(kx, ky));
 
             if (ImGui::Button("E", ImVec2(key_width, key_height)))
                 counter++;
+            draw_list->AddRect(ImVec2(p.x+kx,p.y+ky), ImVec2(p.x+kx + key_width, p.y+ky + key_height), col, rounding, ImDrawFlags_None, th);  // Square with all rounded corners
+
             kx += key_width + key_spacing_x;
             ImGui::SetCursorPos(ImVec2(kx, ky));
 
             if (ImGui::Button("R", ImVec2(key_width, key_height)))
                 counter++;
+            draw_list->AddRect(ImVec2(p.x+kx,p.y+ky), ImVec2(p.x+kx + key_width, p.y+ky + key_height), col, rounding, ImDrawFlags_None, th);  // Square with all rounded corners
+
             kx += key_width + key_spacing_x;
             ImGui::SetCursorPos(ImVec2(kx, ky));
 
             if (ImGui::Button("T", ImVec2(key_width, key_height)))
                 counter++;
-
-
+            draw_list->AddRect(ImVec2(p.x+kx,p.y+ky), ImVec2(p.x+kx + key_width, p.y+ky + key_height), col, rounding, ImDrawFlags_None, th);  // Square with all rounded corners
 
 			ImGui::EndGroup();
 
