@@ -407,6 +407,7 @@ int main(int, char**)
 				{
 					ImGui::BeginChildFrame(8, ImVec2(2048, 640), 0);
 					
+					// Render the sym layer
 
 					ImGui::EndChildFrame();
 					ImGui::EndTabItem();
@@ -416,6 +417,7 @@ int main(int, char**)
 				{
 					ImGui::BeginChildFrame(8, ImVec2(2048, 640), 0);
 					
+					// Render the raise layer
 
 					ImGui::EndChildFrame();
 					ImGui::EndTabItem();
