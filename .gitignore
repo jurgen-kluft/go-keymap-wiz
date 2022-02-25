@@ -22,10 +22,9 @@ tags
 !*.csproj
 !*.resx
 
-!*.hlsl
-!*.fragment
 
 !*.md
+!*.ttf
 !*.jpg
 !*.txt
 !*.html

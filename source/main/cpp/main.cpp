@@ -19,49 +19,39 @@ struct key_t
 {
     key_t()
     {
-        m_nob             = false;
-        m_index_in_keymap = 0;
-        m_label           = "Q";
-        m_w               = 80.0f;
-        m_h               = 80.0f;
-
+        m_nob      = false;
+        m_index    = 0;
+        m_label    = "Q";
+        m_w        = 80.0f;
+        m_h        = 80.0f;
         m_capcolor = ImVec4(0.25f, 0.25f, 0.25f, 1.0f);
         m_ledcolor = ImVec4(1.0f, 0.1f, 0.1f, 1.0f);
         m_txtcolor = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
     }
-    // key shape (normal, L, ...)
-    // nob
 
-    bool m_nob; // home-key (e.g. the F or J key)
-
-    int         m_index_in_keymap;
-    const char* m_label;
-
-    float m_w; // key width
-    float m_h; // key height
-
-    ImVec4 m_capcolor;
-    ImVec4 m_txtcolor;
-    ImVec4 m_ledcolor;
+    bool        m_nob;      // home-key (e.g. the F or J key)
+    int         m_index;    // index in keymap
+    const char* m_label;    // label (e.g. "Q")
+    float       m_w;        // key width
+    float       m_h;        // key height
+    ImVec4      m_capcolor; // color of the key cap
+    ImVec4      m_txtcolor; // color of the key label
+    ImVec4      m_ledcolor; // color of the key led
 };
 
 struct keygroup_t
 {
     const char* m_name;
-
-    bool m_horizontal; // horizontal or vertical
-
-    float m_x;
-    float m_y;
-    int   m_r; // -45 degrees to 45 degrees (granularity is 1 degree)
-
-    float m_w;  // key width
-    float m_h;  // key height
-    float m_sw; // key spacing width
-    float m_sh; // key spacing height
-
-    int    m_nb_keys;
-    key_t* m_keys;
+    bool        m_horizontal; // horizontal or vertical
+    float       m_x;
+    float       m_y;
+    int         m_r;  // -45 degrees to 45 degrees (granularity is 1 degree)
+    float       m_w;  // key width
+    float       m_h;  // key height
+    float       m_sw; // key spacing width
+    float       m_sh; // key spacing height
+    int         m_nb_keys;
+    key_t*      m_keys;
 };
 
 struct keyboard_t
@@ -74,53 +64,73 @@ struct keyboard_t
         m_h            = 81.f;
         m_sw           = 9.f;
         m_sh           = 9.f;
-
-        m_is_split_kb       = true;
-        m_has_underglow_rgb = true;
-        m_has_per_key_rgb   = false;
     }
 
     int        m_nb_keygroups;
     keygroup_t m_keygroup[256];
 
-	// global caps, txt and led color, can be overriden per key
-	ImVec4 m_capcolor;
-	ImVec4 m_txtcolor;
-	ImVec4 m_ledcolor;
-
-    float m_scale;
-
-    float m_w;  // key width
-    float m_h;  // key height
-    float m_sw; // key spacing width
-    float m_sh; // key spacing height
-
-    bool m_is_split_kb;
-    bool m_has_underglow_rgb;
-    bool m_has_per_key_rgb;
+    // global caps, txt and led color, can be overriden per key
+    ImVec4 m_capcolor;
+    ImVec4 m_txtcolor;
+    ImVec4 m_ledcolor;
+    float  m_scale;
+    float  m_w;  // key width
+    float  m_h;  // key height
+    float  m_sw; // key spacing width
+    float  m_sh; // key spacing height
 };
 
 keygroup_t* new_keygroup(keyboard_t& kb, int num_keys)
 {
-	keygroup_t* k = &kb.m_keygroup[kb.m_nb_keygroups++];
+    keygroup_t* k = &kb.m_keygroup[kb.m_nb_keygroups++];
 
-	k->m_name = "";
+    k->m_name = "";
 
-	k->m_horizontal = true;
+    k->m_horizontal = true;
 
-	k->m_x = 0.f;
-	k->m_y = 0.f;
-	k->m_r = 0;
+    k->m_x = 0.f;
+    k->m_y = 0.f;
+    k->m_r = 0;
 
-	k->m_w = kb.m_w;
-	k->m_h = kb.m_h;
-	k->m_sw = kb.m_sw;
-	k->m_sh = kb.m_sh;
+    k->m_w  = kb.m_w;
+    k->m_h  = kb.m_h;
+    k->m_sw = kb.m_sw;
+    k->m_sh = kb.m_sh;
 
-	k->m_nb_keys = num_keys;
-	k->m_keys = new key_t[num_keys];
+    k->m_nb_keys = num_keys;
+    k->m_keys    = new key_t[num_keys];
 
-	return k;
+    return k;
+}
+keygroup_t* add_keygroup(keyboard_t& kb, int k1)
+{
+    keygroup_t* k        = new_keygroup(kb, 1);
+    k->m_keys[0].m_index = k1;
+    return k;
+}
+keygroup_t* add_keygroup(keyboard_t& kb, int k1, int k2)
+{
+    keygroup_t* k        = new_keygroup(kb, 2);
+    k->m_keys[0].m_index = k1;
+    k->m_keys[1].m_index = k2;
+    return k;
+}
+keygroup_t* add_keygroup(keyboard_t& kb, int k1, int k2, int k3)
+{
+    keygroup_t* k        = new_keygroup(kb, 3);
+    k->m_keys[0].m_index = k1;
+    k->m_keys[1].m_index = k2;
+    k->m_keys[2].m_index = k3;
+    return k;
+}
+keygroup_t* add_keygroup(keyboard_t& kb, int k1, int k2, int k3, int k4)
+{
+    keygroup_t* k        = new_keygroup(kb, 4);
+    k->m_keys[0].m_index = k1;
+    k->m_keys[1].m_index = k2;
+    k->m_keys[2].m_index = k3;
+    k->m_keys[3].m_index = k4;
+    return k;
 }
 
 static ImVec4 Darken(ImVec4 const& c, float p)
@@ -175,150 +185,191 @@ static void DrawKey(keyboard_t const& kb, float cx, float cy, float r, key_t con
     const float kw        = key.m_w * kb.m_scale;
     const float kh        = key.m_h * kb.m_scale;
     const float rounding  = kw / 5.0f;
-    const float x         = cx + 4.0f;
-    const float y         = cy + 4.0f;
+    const float x         = cx;
+    const float y         = cy;
+	const float hw = key.m_w / 2;
+	const float hh = key.m_h / 2;
     const float th        = thickness;
 
     const ImU32 rkeycapcolor = ImColor(key.m_capcolor);
     ImVec4      dkeyledcolor(key.m_ledcolor);
     const ImU32 rkeyledcolor1 = ImColor(Darken(key.m_ledcolor, 0.2f));
     const ImU32 rkeyledcolor2 = ImColor(Darken(key.m_ledcolor, 0.1f));
-    const ImU32 rkeyledcolor3 = ImColor(key.m_ledcolor);
+	const ImU32 rkeyledcolor3 = ImColor(key.m_ledcolor);
+	const ImU32 rkeytxtcolor = ImColor(key.m_txtcolor);
 
     // draw_list->AddRect(ImVec2(x, y), ImVec2(x + sz, y + sz), rkeyledcolor, rounding, ImDrawFlags_RoundCornersAll, th/1.0f);
     ImDrawList* draw_list = ImGui::GetWindowDrawList();
     ImRotation  rotation(draw_list);
 
-    draw_list->AddRect(ImVec2(x, y), ImVec2(x + kw, y + kh), (rkeyledcolor1), rounding, ImDrawFlags_None, th / 1.0f);
-    draw_list->AddRect(ImVec2(x, y), ImVec2(x + kw, y + kh), (rkeyledcolor2), rounding, ImDrawFlags_None, th / 2.0f);
-    draw_list->AddRect(ImVec2(x, y), ImVec2(x + kw, y + kh), (rkeyledcolor3), rounding, ImDrawFlags_None, th / 3.0f);
-    draw_list->AddRectFilled(ImVec2(x, y), ImVec2(x + kw, y + kh), rkeycapcolor, rounding, ImDrawFlags_RoundCornersAll);
+    draw_list->AddRect(ImVec2(x-hw, y-hh), ImVec2(x + hw, y + hh), (rkeyledcolor1), rounding, ImDrawFlags_None, th / 1.0f);
+    draw_list->AddRect(ImVec2(x-hw, y-hh), ImVec2(x + hw, y + hh), (rkeyledcolor2), rounding, ImDrawFlags_None, th / 2.0f);
+    draw_list->AddRect(ImVec2(x-hw, y-hh), ImVec2(x + hw, y + hh), (rkeyledcolor3), rounding, ImDrawFlags_None, th / 3.0f);
+    draw_list->AddRectFilled(ImVec2(x-hw, y-hh), ImVec2(x + hw, y + hh), rkeycapcolor, rounding, ImDrawFlags_RoundCornersAll);
+
+	if (key.m_label != nullptr)
+	{
+		ImVec2 td = ImGui::CalcTextSize(key.m_label);
+		draw_list->AddText(ImVec2(x - (td.x/2), y - (td.y/2)), rkeytxtcolor, key.m_label);
+	}
+
+	if (key.m_nob)
+		draw_list->AddLine(ImVec2(x - 5, y + 0.5*hh), ImVec2(x + 5, y + 0.5*hh), ImColor(255, 255, 255, 255), 2);
 
     rotation.Apply(r);
 }
 
-// setup a keyboard similar to Kyria
-void setup(keyboard_t& kb) 
+/*
 {
-	keygroup_t* l1 = new_keygroup(kb, 3);
-	l1->m_horizontal = false;
-	l1->m_x = 10.f;
-	l1->m_y = 100.f;
+	"key_width": 80,
+	"key_height": 80,
+	"key_spacing_x": 10,
+	"key_spacing_y": 10,
+	"keygroups": [
+		{
+			"h": false,
+			"x": 10,
+			"y": 100,
+			"rotation": 0,
+			"keys": [
+				{ "label": "Esc", "index": 0, "home": false, "cap_color": #00FF00, "led_color": #FFFFFF, "txt_color": #FFFFFF, "key_width": 80, "key_height": 80 }
+			]
+		},
 
-	keygroup_t* l2 = new_keygroup(kb, 3);
-	l2->m_horizontal = false;
-	l2->m_x = 10.f + 1*(kb.m_w + kb.m_sw);
-	l2->m_y = 100.f;
+	]
+}
 
-	keygroup_t* l3 = new_keygroup(kb, 3);
-	l3->m_horizontal = false;
-	l3->m_x = 10.f + 2*(kb.m_w + kb.m_sw);
-	l3->m_y = 100.f - 60.0f;
+*/
 
-	keygroup_t* l4 = new_keygroup(kb, 3);
-	l4->m_horizontal = false;
-	l4->m_x = 10.f + 3*(kb.m_w + kb.m_sw);
-	l4->m_y = 100.f - 90.0f;
+// setup a keyboard similar to Kyria
+void setup(keyboard_t& kb)
+{
+    keygroup_t* l1   = add_keygroup(kb, 0, 12, 24);
+    l1->m_horizontal = false;
+    l1->m_x          = 10.f;
+    l1->m_y          = 100.f;
 
-	keygroup_t* l5 = new_keygroup(kb, 3);
-	l5->m_horizontal = false;
-	l5->m_x = 10.f + 4*(kb.m_w + kb.m_sw);
-	l5->m_y = 100.f - 60.0f;
+    keygroup_t* l2   = add_keygroup(kb, 1, 13, 25);
+    l2->m_horizontal = false;
+    l2->m_x          = 10.f + 1 * (kb.m_w + kb.m_sw);
+    l2->m_y          = 100.f;
+	l2->m_keys[0].m_label = "Q";
+	l2->m_keys[1].m_label = "A";
+	l2->m_keys[2].m_label = "Z";
 
-	keygroup_t* l6 = new_keygroup(kb, 3);
-	l6->m_horizontal = false;
-	l6->m_x = 10.f + 5*(kb.m_w + kb.m_sw);
-	l6->m_y = 100.f - 50.0f;
+    keygroup_t* l3   = add_keygroup(kb, 2, 14, 26);
+    l3->m_horizontal = false;
+    l3->m_x          = 10.f + 2 * (kb.m_w + kb.m_sw);
+    l3->m_y          = 100.f - 60.0f;
 
-	keygroup_t* l7 = new_keygroup(kb, 2);
-	l7->m_horizontal = false;
-	l7->m_x = 10.f + 6*(kb.m_w + kb.m_sw);
-	l7->m_y = 100.f + 2*(kb.m_h + kb.m_sh);
-	l7->m_r = 30;
-	
-	keygroup_t* l8 = new_keygroup(kb, 2);
-	l8->m_horizontal = false;
-	l8->m_x = 10.f + 7*(kb.m_w + kb.m_sw);
-	l8->m_y = 70.f + 3*(kb.m_h + kb.m_sh);
-	l8->m_r = 40;
+    keygroup_t* l4   = add_keygroup(kb, 3, 15, 27);
+    l4->m_horizontal = false;
+    l4->m_x          = 10.f + 3 * (kb.m_w + kb.m_sw);
+    l4->m_y          = 100.f - 90.0f;
 
-	// horizontal group of 2 keys
-	keygroup_t* l11 = new_keygroup(kb, 2);
-	l11->m_horizontal = true;
-	l11->m_x = 10.f + (kb.m_w/2.6f) + 2*(kb.m_w + kb.m_sw);
-	l11->m_y = 100.f - 60.0f + 3*(kb.m_w + kb.m_sw);;
-	
-	keygroup_t* l0 = new_keygroup(kb, 1);
-	l0->m_horizontal = true;
-	l0->m_x = 10.f + (kb.m_w/2.6f) + kb.m_sw + 4*(kb.m_w + kb.m_sw);
-	l0->m_y = 100.f - 50.0f + 3*(kb.m_w + kb.m_sw);;
-	l0->m_r = 10;
+    keygroup_t* l5   = add_keygroup(kb, 4, 16, 28);
+    l5->m_horizontal = false;
+    l5->m_x          = 10.f + 4 * (kb.m_w + kb.m_sw);
+    l5->m_y          = 100.f - 60.0f;
+	l5->m_keys[1].m_nob = true;
 
+    keygroup_t* l6   = add_keygroup(kb, 5, 17, 29);
+    l6->m_horizontal = false;
+    l6->m_x          = 10.f + 5 * (kb.m_w + kb.m_sw);
+    l6->m_y          = 100.f - 50.0f;
 
+    keygroup_t* l7   = new_keygroup(kb, 2);
+    l7->m_horizontal = false;
+    l7->m_x          = 10.f + 6 * (kb.m_w + kb.m_sw);
+    l7->m_y          = 100.f + 2 * (kb.m_h + kb.m_sh);
+    l7->m_r          = 30;
+	l7->m_keys[0].m_label = "Q";
+	l7->m_keys[1].m_label = "A";
 
+    keygroup_t* l8   = new_keygroup(kb, 2);
+    l8->m_horizontal = false;
+    l8->m_x          = 10.f + 7 * (kb.m_w + kb.m_sw);
+    l8->m_y          = 70.f + 3 * (kb.m_h + kb.m_sh);
+    l8->m_r          = 40;
+	l8->m_keys[0].m_label = "Q";
+	l8->m_keys[1].m_label = "A";
 
+    // horizontal group of 2 keys
+    keygroup_t* l11   = new_keygroup(kb, 2);
+    l11->m_horizontal = true;
+    l11->m_x          = 10.f + (kb.m_w / 2.6f) + 2 * (kb.m_w + kb.m_sw);
+    l11->m_y          = 100.f - 60.0f + 3 * (kb.m_w + kb.m_sw);
+    ;
 
+    keygroup_t* l0   = new_keygroup(kb, 1);
+    l0->m_horizontal = true;
+    l0->m_x          = 10.f + (kb.m_w / 2.6f) + kb.m_sw + 4 * (kb.m_w + kb.m_sw);
+    l0->m_y          = 100.f - 50.0f + 3 * (kb.m_w + kb.m_sw);
+    ;
+    l0->m_r = 10;
 
-	keygroup_t* r8 = new_keygroup(kb, 2);
-	r8->m_horizontal = false;
-	r8->m_x = 10.f + 9*(kb.m_w + kb.m_sw);
-	r8->m_y = 70.f + 3*(kb.m_h + kb.m_sh);
-	r8->m_r = -40;
+    keygroup_t* r8   = new_keygroup(kb, 2);
+    r8->m_horizontal = false;
+    r8->m_x          = 10.f + 9 * (kb.m_w + kb.m_sw);
+    r8->m_y          = 70.f + 3 * (kb.m_h + kb.m_sh);
+    r8->m_r          = -40;
 
-	keygroup_t* r7 = new_keygroup(kb, 2);
-	r7->m_horizontal = false;
-	r7->m_x = 10.f + 10*(kb.m_w + kb.m_sw);
-	r7->m_y = 100.f + 2*(kb.m_h + kb.m_sh);
-	r7->m_r = -30;
+    keygroup_t* r7   = new_keygroup(kb, 2);
+    r7->m_horizontal = false;
+    r7->m_x          = 10.f + 10 * (kb.m_w + kb.m_sw);
+    r7->m_y          = 100.f + 2 * (kb.m_h + kb.m_sh);
+    r7->m_r          = -30;
 
-	keygroup_t* r6 = new_keygroup(kb, 3);
-	r6->m_horizontal = false;
-	r6->m_x = 10.f + 11*(kb.m_w + kb.m_sw);
-	r6->m_y = 100.f - 50.0f;
+    keygroup_t* r6   = new_keygroup(kb, 3);
+    r6->m_horizontal = false;
+    r6->m_x          = 10.f + 11 * (kb.m_w + kb.m_sw);
+    r6->m_y          = 100.f - 50.0f;
 
-	keygroup_t* r5 = new_keygroup(kb, 3);
-	r5->m_horizontal = false;
-	r5->m_x = 10.f + 12*(kb.m_w + kb.m_sw);
-	r5->m_y = 100.f - 60.0f;
+    keygroup_t* r5   = new_keygroup(kb, 3);
+    r5->m_horizontal = false;
+    r5->m_x          = 10.f + 12 * (kb.m_w + kb.m_sw);
+    r5->m_y          = 100.f - 60.0f;
+	r5->m_keys[1].m_nob = true;
 
-	keygroup_t* r4 = new_keygroup(kb, 3);
-	r4->m_horizontal = false;
-	r4->m_x = 10.f + 13*(kb.m_w + kb.m_sw);
-	r4->m_y = 100.f - 90.0f;
+    keygroup_t* r4   = new_keygroup(kb, 3);
+    r4->m_horizontal = false;
+    r4->m_x          = 10.f + 13 * (kb.m_w + kb.m_sw);
+    r4->m_y          = 100.f - 90.0f;
 
-	keygroup_t* r3 = new_keygroup(kb, 3);
-	r3->m_horizontal = false;
-	r3->m_x = 10.f + 14*(kb.m_w + kb.m_sw);
-	r3->m_y = 100.f - 60.0f;
+    keygroup_t* r3   = new_keygroup(kb, 3);
+    r3->m_horizontal = false;
+    r3->m_x          = 10.f + 14 * (kb.m_w + kb.m_sw);
+    r3->m_y          = 100.f - 60.0f;
 
-	keygroup_t* r2 = new_keygroup(kb, 3);
-	r2->m_horizontal = false;
-	r2->m_x = 10.f + 15*(kb.m_w + kb.m_sw);
-	r2->m_y = 100.f;
+    keygroup_t* r2   = new_keygroup(kb, 3);
+    r2->m_horizontal = false;
+    r2->m_x          = 10.f + 15 * (kb.m_w + kb.m_sw);
+    r2->m_y          = 100.f;
 
-	keygroup_t* r1 = new_keygroup(kb, 3);
-	r1->m_horizontal = false;
-	r1->m_x = 10.f + 16*(kb.m_w + kb.m_sw);
-	r1->m_y = 100.f;
+    keygroup_t* r1   = new_keygroup(kb, 3);
+    r1->m_horizontal = false;
+    r1->m_x          = 10.f + 16 * (kb.m_w + kb.m_sw);
+    r1->m_y          = 100.f;
 
-	// horizontal group of 2 keys
-	keygroup_t* r11 = new_keygroup(kb, 2);
-	r11->m_horizontal = true;
-	r11->m_x = 10.f - (kb.m_w/2.6f) + 13*(kb.m_w + kb.m_sw);
-	r11->m_y = 100.f - 60.0f + 3*(kb.m_w + kb.m_sw);;
+    // horizontal group of 2 keys
+    keygroup_t* r11   = new_keygroup(kb, 2);
+    r11->m_horizontal = true;
+    r11->m_x          = 10.f - (kb.m_w / 2.6f) + 13 * (kb.m_w + kb.m_sw);
+    r11->m_y          = 100.f - 60.0f + 3 * (kb.m_w + kb.m_sw);
+    ;
 
-	keygroup_t* r0 = new_keygroup(kb, 1);
-	r0->m_horizontal = true;
-	r0->m_x = 10.f - (kb.m_w/2.6f) - kb.m_sw + 12*(kb.m_w + kb.m_sw);
-	r0->m_y = 100.f - 50.0f + 3*(kb.m_w + kb.m_sw);;
-	r0->m_r = -10;
-
+    keygroup_t* r0   = new_keygroup(kb, 1);
+    r0->m_horizontal = true;
+    r0->m_x          = 10.f - (kb.m_w / 2.6f) - kb.m_sw + 12 * (kb.m_w + kb.m_sw);
+    r0->m_y          = 100.f - 50.0f + 3 * (kb.m_w + kb.m_sw);
+    ;
+    r0->m_r = -10;
 }
 
 void render(ImVec2 const& pos, keyboard_t const& kb)
 {
-	float cx = pos.x + kb.m_sw + kb.m_w / 2;
-	float cy = pos.y + kb.m_sw + kb.m_h / 2;
+    float cx = pos.x + kb.m_sw + kb.m_w;
+    float cy = pos.y + kb.m_sw + kb.m_h;
 
     // Draw a bunch of primitives
     float ks = kb.m_scale;
@@ -342,15 +393,15 @@ void render(ImVec2 const& pos, keyboard_t const& kb)
             dir.y = 1.0f;
         }
 
-		float rrad = 0.0f;
+        float rrad = 0.0f;
         if (kg->m_r > 0 || kg->m_r < 0)
         {
-			// convert degrees 'm_r' to radians
-			rrad = (float)3.141592653f * kg->m_r / 180.0f;
+            // convert degrees 'm_r' to radians
+            rrad = (float)3.141592653f * kg->m_r / 180.0f;
             // rotate dir by kg->m_r
             const float s = (float)sin(rrad);
             const float c = (float)cos(rrad);
-			dir = ImRotate(dir, c, s);
+            dir           = ImRotate(dir, c, s);
         }
 
         for (int k = 0; k < kg->m_nb_keys; k++)
@@ -446,7 +497,7 @@ int main(int, char**)
     // - Read 'docs/FONTS.md' for more instructions and details.
     // - Remember that in C/C++ if you want to include a backslash \ in a string literal you need to write a double backslash \\ !
     // io.Fonts->AddFontDefault();
-    // io.Fonts->AddFontFromFileTTF("../../misc/fonts/Roboto-Medium.ttf", 16.0f);
+    io.Fonts->AddFontFromFileTTF("fonts/Roboto-Medium.ttf", 28.0f);
     // io.Fonts->AddFontFromFileTTF("../../misc/fonts/Cousine-Regular.ttf", 15.0f);
     // io.Fonts->AddFontFromFileTTF("../../misc/fonts/DroidSans.ttf", 16.0f);
     // io.Fonts->AddFontFromFileTTF("../../misc/fonts/ProggyTiny.ttf", 10.0f);
@@ -458,9 +509,9 @@ int main(int, char**)
     bool   show_another_window = false;
     ImVec4 clear_color         = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
-	static keyboard_t kb;
-	setup(kb);
-	kb.m_scale = io.FontGlobalScale;
+    static keyboard_t kb;
+    setup(kb);
+    kb.m_scale = io.FontGlobalScale;
 
     // Main loop
     while (!glfwWindowShouldClose(window))
@@ -531,33 +582,33 @@ int main(int, char**)
 
                 if (ImGui::BeginTabItem("SYM Layer"))
                 {
-					ImGui::BeginChildFrame(8, ImVec2(2048, 840), 0);
+                    ImGui::BeginChildFrame(8, ImVec2(2048, 840), 0);
 
-					ImVec2 p = ImGui::GetCursorScreenPos();
+                    ImVec2 p = ImGui::GetCursorScreenPos();
 
-					ImDrawList* draw_list = ImGui::GetWindowDrawList();
-					draw_list->AddRectFilled(ImVec2(p.x, p.y), ImVec2(p.x + 2048, p.y + 800), ImColor(26, 26, 26, 256), 0, ImDrawFlags_RoundCornersAll);
+                    ImDrawList* draw_list = ImGui::GetWindowDrawList();
+                    draw_list->AddRectFilled(ImVec2(p.x, p.y), ImVec2(p.x + 2048, p.y + 800), ImColor(26, 26, 26, 256), 0, ImDrawFlags_RoundCornersAll);
 
-					render(p, kb);
+                    render(p, kb);
 
-					ImGui::EndChildFrame();
-					ImGui::EndTabItem();
-				}
+                    ImGui::EndChildFrame();
+                    ImGui::EndTabItem();
+                }
 
                 if (ImGui::BeginTabItem("RAISE Layer"))
                 {
-					ImGui::BeginChildFrame(8, ImVec2(2048, 840), 0);
+                    ImGui::BeginChildFrame(8, ImVec2(2048, 840), 0);
 
-					ImVec2 p = ImGui::GetCursorScreenPos();
+                    ImVec2 p = ImGui::GetCursorScreenPos();
 
-					ImDrawList* draw_list = ImGui::GetWindowDrawList();
-					draw_list->AddRectFilled(ImVec2(p.x, p.y), ImVec2(p.x + 2048, p.y + 800), ImColor(26, 26, 26, 256), 0, ImDrawFlags_RoundCornersAll);
+                    ImDrawList* draw_list = ImGui::GetWindowDrawList();
+                    draw_list->AddRectFilled(ImVec2(p.x, p.y), ImVec2(p.x + 2048, p.y + 800), ImColor(26, 26, 26, 256), 0, ImDrawFlags_RoundCornersAll);
 
-					render(p, kb);
+                    render(p, kb);
 
-					ImGui::EndChildFrame();
-					ImGui::EndTabItem();
-				}
+                    ImGui::EndChildFrame();
+                    ImGui::EndTabItem();
+                }
 
                 ImGui::EndTabBar();
             }
