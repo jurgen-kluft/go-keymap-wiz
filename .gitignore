@@ -3,7 +3,6 @@
 !*/
 
 target/
-tags
 
 #except the following files
 !.gitignore
@@ -21,7 +20,6 @@ tags
 !*.cs
 !*.csproj
 !*.resx
-
 
 !*.md
 !*.ttf
