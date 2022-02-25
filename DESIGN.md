@@ -3,6 +3,9 @@
 Language & Framework
 
 - C/C++ and ImGUI (Done)
+- LUA for extensions
+  - JSON reading and writing
+  
 
 Links:
 - https://github.com/mnesarco/bawr (fonts, icons, svg)
