@@ -2,7 +2,7 @@
 
 Language & Framework
 
-- C/C++ and ImGUI
+- C/C++ and ImGUI (Done)
 
 Links:
 - https://github.com/mnesarco/bawr (fonts, icons, svg)
@@ -11,12 +11,11 @@ General Idea (follow ZSA Oryx):
 
 - Create a new layout object that can handle keyboard layouts (data driven)
 - Create a new widget that can render a keyboard key (1u, 2u) similar to what ZSA Oryx does
-- Have the App consist of two windows, one with a container that can display the keyboard layers and
-  the other with properties of the layer or the key that is selected.
+- Have the App be able to add/remove layers
 
 Currently these are not straightforward:
 
-- Rotate a key (got a prototype)
+- Rotate a key and its label (Done)
 
 What are the properties of a key?
 
