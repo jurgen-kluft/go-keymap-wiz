@@ -2,13 +2,10 @@
 
 Language & Framework
 
-- C/C++ and ImGUI (Hello ImGUI; https://github.com/pthom/hello_imgui)
+- C/C++ and ImGUI
 
 Links:
-- https://github.com/cryham/ckeys (keyboard layout app)
 - https://github.com/mnesarco/bawr (fonts, icons, svg)
-- https://github.com/zserge/jsmn (json parser for C/C++)
-- https://github.com/ijprest/kle-serial/blob/master/index.ts (format of json exported by keyboard-layout-editor.com)
 
 General Idea (follow ZSA Oryx):
 
@@ -19,7 +16,7 @@ General Idea (follow ZSA Oryx):
 
 Currently these are not straightforward:
 
-- Rotate a widget/key
+- Rotate a key (got a prototype)
 
 What are the properties of a key?
 
@@ -28,6 +25,7 @@ What are the properties of a key?
 - The keycode when tapped
 - The keycode when held / double tapped
 - The textual and icon representation information of the key that is displayed in the key widget
+- The LED glow color of the key
 - The color of the key (just for visual purposes and rendering the SVG)
 - The size of the key (1u, 2u)
 

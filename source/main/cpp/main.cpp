@@ -4,7 +4,7 @@
 #include "libimgui/imgui_impl_opengl3.h"
 
 #include <stdio.h>
-#include <math.h>           // sqrtf, powf, cosf, sinf, floorf, ceilf
+#include <math.h> // sqrtf, powf, cosf, sinf, floorf, ceilf
 
 #include "libglfw/glfw3.h" // Will drag system OpenGL headers
 
@@ -17,185 +17,366 @@
 
 struct key_t
 {
-	key_t()
-	{
-		m_nob = false;
-		m_index_in_keymap = 0;
-		m_label = "Q";
-		m_w = 80.0f;
-		m_h = 80.0f;
+    key_t()
+    {
+        m_nob             = false;
+        m_index_in_keymap = 0;
+        m_label           = "Q";
+        m_w               = 80.0f;
+        m_h               = 80.0f;
 
-		m_capcolor = ImVec4(0.25f, 0.25f, 0.25f, 1.0f);
-		m_ledcolor = ImVec4(1.0f, 0.1f, 0.1f, 1.0f);
-		m_txtcolor = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
-	}
-	// key shape (normal, L, ...)
-	// nob
+        m_capcolor = ImVec4(0.25f, 0.25f, 0.25f, 1.0f);
+        m_ledcolor = ImVec4(1.0f, 0.1f, 0.1f, 1.0f);
+        m_txtcolor = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
+    }
+    // key shape (normal, L, ...)
+    // nob
 
-	bool m_nob; // home-key (e.g. the F or J key)
+    bool m_nob; // home-key (e.g. the F or J key)
 
-	int m_index_in_keymap;
-	const char* m_label;
+    int         m_index_in_keymap;
+    const char* m_label;
 
-	float m_w;  // key width
-	float m_h;  // key height
+    float m_w; // key width
+    float m_h; // key height
 
-	ImVec4 m_capcolor;
-	ImVec4 m_txtcolor;
-	ImVec4 m_ledcolor;
-
+    ImVec4 m_capcolor;
+    ImVec4 m_txtcolor;
+    ImVec4 m_ledcolor;
 };
 
-struct col_t
+struct keygroup_t
 {
-	float m_x;
-	float m_y;
-	int  m_r;  // -45 degrees to 45 degrees (granularity is 1 degree)
+    const char* m_name;
 
-	float m_w;  // key width
-	float m_h;  // key height
-	float m_sw; // key spacing width
-	float m_sh;	// key spacing height
+    bool m_horizontal; // horizontal or vertical
 
-	int m_nb_keys;
-	key_t* m_keys;
-};
+    float m_x;
+    float m_y;
+    int   m_r; // -45 degrees to 45 degrees (granularity is 1 degree)
 
-struct row_t
-{
-	float m_x;
-	float m_y;
-	int  m_r;  // -45 degrees to 45 degrees (granularity is 1 degree)
+    float m_w;  // key width
+    float m_h;  // key height
+    float m_sw; // key spacing width
+    float m_sh; // key spacing height
 
-	float m_w;  // key width
-	float m_h;  // key height
-	float m_sw; // key spacing width
-	float m_sh;	// key spacing height
-
-	int m_nb_keys;
-	key_t* m_keys;
+    int    m_nb_keys;
+    key_t* m_keys;
 };
 
 struct keyboard_t
 {
-	keyboard_t()
-	{
-		m_colums = nullptr;
-		m_rows = nullptr;
-		m_scale = 1.0f;
-		m_w = 80.f;
-		m_h = 80.f;
-		m_sw = 10.f;
-		m_sh = 10.f;
+    keyboard_t()
+    {
+        m_nb_keygroups = 0;
+        m_scale        = 1.0f;
+        m_w            = 81.f;
+        m_h            = 81.f;
+        m_sw           = 9.f;
+        m_sh           = 9.f;
 
-		m_is_split_kb = true;
-		m_has_underglow_rgb = true;
-		m_has_per_key_rgb = false;
-	}
+        m_is_split_kb       = true;
+        m_has_underglow_rgb = true;
+        m_has_per_key_rgb   = false;
+    }
 
-	col_t** m_colums;
-	row_t** m_rows;
+    int        m_nb_keygroups;
+    keygroup_t m_keygroup[256];
 
-	float m_scale;
+	// global caps, txt and led color, can be overriden per key
+	ImVec4 m_capcolor;
+	ImVec4 m_txtcolor;
+	ImVec4 m_ledcolor;
 
-	float m_w;  // key width
-	float m_h;  // key height
-	float m_sw; // key spacing width
-	float m_sh;	// key spacing height
+    float m_scale;
 
-	bool m_is_split_kb;
-	bool m_has_underglow_rgb;
-	bool m_has_per_key_rgb;
+    float m_w;  // key width
+    float m_h;  // key height
+    float m_sw; // key spacing width
+    float m_sh; // key spacing height
 
+    bool m_is_split_kb;
+    bool m_has_underglow_rgb;
+    bool m_has_per_key_rgb;
 };
+
+keygroup_t* new_keygroup(keyboard_t& kb, int num_keys)
+{
+	keygroup_t* k = &kb.m_keygroup[kb.m_nb_keygroups++];
+
+	k->m_name = "";
+
+	k->m_horizontal = true;
+
+	k->m_x = 0.f;
+	k->m_y = 0.f;
+	k->m_r = 0;
+
+	k->m_w = kb.m_w;
+	k->m_h = kb.m_h;
+	k->m_sw = kb.m_sw;
+	k->m_sh = kb.m_sh;
+
+	k->m_nb_keys = num_keys;
+	k->m_keys = new key_t[num_keys];
+
+	return k;
+}
+
+static ImVec4 Darken(ImVec4 const& c, float p)
+{
+    ImVec4 r;
+    r.x = c.x - (c.x * p);
+    r.y = c.y - (c.y * p);
+    r.z = c.z - (c.z * p);
+    r.w = c.w - (c.w * p);
+    return r;
+}
+
+ImVec2 operator-(const ImVec2& l, const ImVec2& r) { return {l.x - r.x, l.y - r.y}; }
+struct ImRotation
+{
+    ImRotation(ImDrawList* draw_list)
+    {
+        m_draw_list = draw_list;
+        m_start     = draw_list->VtxBuffer.Size;
+    }
+
+    ImVec2 Center()
+    {
+        ImVec2 l(FLT_MAX, FLT_MAX), u(-FLT_MAX, -FLT_MAX); // bounds
+
+        const auto& buf = m_draw_list->VtxBuffer;
+        for (int i = m_start; i < buf.Size; i++)
+            l = ImMin(l, buf[i].pos), u = ImMax(u, buf[i].pos);
+
+        return ImVec2((l.x + u.x) / 2, (l.y + u.y) / 2); // or use _ClipRectStack?
+    }
+
+    void Apply(float rad)
+    {
+        ImVec2 center = Center();
+
+        float s = (float)sin(rad), c = (float)cos(rad);
+        center = ImRotate(center, c, s) - center;
+
+        auto& buf = m_draw_list->VtxBuffer;
+        for (int i = m_start; i < buf.Size; i++)
+            buf[i].pos = ImRotate(buf[i].pos, c, s) - center;
+    }
+
+    ImDrawList* m_draw_list;
+    int         m_start;
+};
+
+static void DrawKey(keyboard_t const& kb, float cx, float cy, float r, key_t const& key)
+{
+    const float thickness = 10.0f * kb.m_scale;
+    const float kw        = key.m_w * kb.m_scale;
+    const float kh        = key.m_h * kb.m_scale;
+    const float rounding  = kw / 5.0f;
+    const float x         = cx + 4.0f;
+    const float y         = cy + 4.0f;
+    const float th        = thickness;
+
+    const ImU32 rkeycapcolor = ImColor(key.m_capcolor);
+    ImVec4      dkeyledcolor(key.m_ledcolor);
+    const ImU32 rkeyledcolor1 = ImColor(Darken(key.m_ledcolor, 0.2f));
+    const ImU32 rkeyledcolor2 = ImColor(Darken(key.m_ledcolor, 0.1f));
+    const ImU32 rkeyledcolor3 = ImColor(key.m_ledcolor);
+
+    // draw_list->AddRect(ImVec2(x, y), ImVec2(x + sz, y + sz), rkeyledcolor, rounding, ImDrawFlags_RoundCornersAll, th/1.0f);
+    ImDrawList* draw_list = ImGui::GetWindowDrawList();
+    ImRotation  rotation(draw_list);
+
+    draw_list->AddRect(ImVec2(x, y), ImVec2(x + kw, y + kh), (rkeyledcolor1), rounding, ImDrawFlags_None, th / 1.0f);
+    draw_list->AddRect(ImVec2(x, y), ImVec2(x + kw, y + kh), (rkeyledcolor2), rounding, ImDrawFlags_None, th / 2.0f);
+    draw_list->AddRect(ImVec2(x, y), ImVec2(x + kw, y + kh), (rkeyledcolor3), rounding, ImDrawFlags_None, th / 3.0f);
+    draw_list->AddRectFilled(ImVec2(x, y), ImVec2(x + kw, y + kh), rkeycapcolor, rounding, ImDrawFlags_RoundCornersAll);
+
+    rotation.Apply(r);
+}
+
+// setup a keyboard similar to Kyria
+void setup(keyboard_t& kb) 
+{
+	keygroup_t* l1 = new_keygroup(kb, 3);
+	l1->m_horizontal = false;
+	l1->m_x = 10.f;
+	l1->m_y = 100.f;
+
+	keygroup_t* l2 = new_keygroup(kb, 3);
+	l2->m_horizontal = false;
+	l2->m_x = 10.f + 1*(kb.m_w + kb.m_sw);
+	l2->m_y = 100.f;
+
+	keygroup_t* l3 = new_keygroup(kb, 3);
+	l3->m_horizontal = false;
+	l3->m_x = 10.f + 2*(kb.m_w + kb.m_sw);
+	l3->m_y = 100.f - 60.0f;
+
+	keygroup_t* l4 = new_keygroup(kb, 3);
+	l4->m_horizontal = false;
+	l4->m_x = 10.f + 3*(kb.m_w + kb.m_sw);
+	l4->m_y = 100.f - 90.0f;
+
+	keygroup_t* l5 = new_keygroup(kb, 3);
+	l5->m_horizontal = false;
+	l5->m_x = 10.f + 4*(kb.m_w + kb.m_sw);
+	l5->m_y = 100.f - 60.0f;
+
+	keygroup_t* l6 = new_keygroup(kb, 3);
+	l6->m_horizontal = false;
+	l6->m_x = 10.f + 5*(kb.m_w + kb.m_sw);
+	l6->m_y = 100.f - 50.0f;
+
+	keygroup_t* l7 = new_keygroup(kb, 2);
+	l7->m_horizontal = false;
+	l7->m_x = 10.f + 6*(kb.m_w + kb.m_sw);
+	l7->m_y = 100.f + 2*(kb.m_h + kb.m_sh);
+	l7->m_r = 30;
+	
+	keygroup_t* l8 = new_keygroup(kb, 2);
+	l8->m_horizontal = false;
+	l8->m_x = 10.f + 7*(kb.m_w + kb.m_sw);
+	l8->m_y = 70.f + 3*(kb.m_h + kb.m_sh);
+	l8->m_r = 40;
+
+	// horizontal group of 2 keys
+	keygroup_t* l11 = new_keygroup(kb, 2);
+	l11->m_horizontal = true;
+	l11->m_x = 10.f + (kb.m_w/2.6f) + 2*(kb.m_w + kb.m_sw);
+	l11->m_y = 100.f - 60.0f + 3*(kb.m_w + kb.m_sw);;
+	
+	keygroup_t* l0 = new_keygroup(kb, 1);
+	l0->m_horizontal = true;
+	l0->m_x = 10.f + (kb.m_w/2.6f) + kb.m_sw + 4*(kb.m_w + kb.m_sw);
+	l0->m_y = 100.f - 50.0f + 3*(kb.m_w + kb.m_sw);;
+	l0->m_r = 10;
+
+
+
+
+
+
+	keygroup_t* r8 = new_keygroup(kb, 2);
+	r8->m_horizontal = false;
+	r8->m_x = 10.f + 9*(kb.m_w + kb.m_sw);
+	r8->m_y = 70.f + 3*(kb.m_h + kb.m_sh);
+	r8->m_r = -40;
+
+	keygroup_t* r7 = new_keygroup(kb, 2);
+	r7->m_horizontal = false;
+	r7->m_x = 10.f + 10*(kb.m_w + kb.m_sw);
+	r7->m_y = 100.f + 2*(kb.m_h + kb.m_sh);
+	r7->m_r = -30;
+
+	keygroup_t* r6 = new_keygroup(kb, 3);
+	r6->m_horizontal = false;
+	r6->m_x = 10.f + 11*(kb.m_w + kb.m_sw);
+	r6->m_y = 100.f - 50.0f;
+
+	keygroup_t* r5 = new_keygroup(kb, 3);
+	r5->m_horizontal = false;
+	r5->m_x = 10.f + 12*(kb.m_w + kb.m_sw);
+	r5->m_y = 100.f - 60.0f;
+
+	keygroup_t* r4 = new_keygroup(kb, 3);
+	r4->m_horizontal = false;
+	r4->m_x = 10.f + 13*(kb.m_w + kb.m_sw);
+	r4->m_y = 100.f - 90.0f;
+
+	keygroup_t* r3 = new_keygroup(kb, 3);
+	r3->m_horizontal = false;
+	r3->m_x = 10.f + 14*(kb.m_w + kb.m_sw);
+	r3->m_y = 100.f - 60.0f;
+
+	keygroup_t* r2 = new_keygroup(kb, 3);
+	r2->m_horizontal = false;
+	r2->m_x = 10.f + 15*(kb.m_w + kb.m_sw);
+	r2->m_y = 100.f;
+
+	keygroup_t* r1 = new_keygroup(kb, 3);
+	r1->m_horizontal = false;
+	r1->m_x = 10.f + 16*(kb.m_w + kb.m_sw);
+	r1->m_y = 100.f;
+
+	// horizontal group of 2 keys
+	keygroup_t* r11 = new_keygroup(kb, 2);
+	r11->m_horizontal = true;
+	r11->m_x = 10.f - (kb.m_w/2.6f) + 13*(kb.m_w + kb.m_sw);
+	r11->m_y = 100.f - 60.0f + 3*(kb.m_w + kb.m_sw);;
+
+	keygroup_t* r0 = new_keygroup(kb, 1);
+	r0->m_horizontal = true;
+	r0->m_x = 10.f - (kb.m_w/2.6f) - kb.m_sw + 12*(kb.m_w + kb.m_sw);
+	r0->m_y = 100.f - 50.0f + 3*(kb.m_w + kb.m_sw);;
+	r0->m_r = -10;
+
+}
+
+void render(ImVec2 const& pos, keyboard_t const& kb)
+{
+	float cx = pos.x + kb.m_sw + kb.m_w / 2;
+	float cy = pos.y + kb.m_sw + kb.m_h / 2;
+
+    // Draw a bunch of primitives
+    float ks = kb.m_scale;
+    float kw = kb.m_w * ks;
+    float kh = kb.m_h * ks;
+
+    for (int g = 0; g < kb.m_nb_keygroups; g++)
+    {
+        keygroup_t const* kg = &kb.m_keygroup[g];
+
+        float x = cx + kg->m_x;
+        float y = cy + kg->m_y;
+
+        ImVec2 dir(0.0f, 0.0f);
+        if (kg->m_horizontal)
+        {
+            dir.x = 1.0f;
+        }
+        else
+        {
+            dir.y = 1.0f;
+        }
+
+		float rrad = 0.0f;
+        if (kg->m_r > 0 || kg->m_r < 0)
+        {
+			// convert degrees 'm_r' to radians
+			rrad = (float)3.141592653f * kg->m_r / 180.0f;
+            // rotate dir by kg->m_r
+            const float s = (float)sin(rrad);
+            const float c = (float)cos(rrad);
+			dir = ImRotate(dir, c, s);
+        }
+
+        for (int k = 0; k < kg->m_nb_keys; k++)
+        {
+            key_t const& key = kg->m_keys[k];
+            DrawKey(kb, x - (kw / 2), y - (kh / 2), rrad, key);
+
+            x += dir.x * (kw + kg->m_sw);
+            y += dir.y * (kh + kg->m_sh);
+        }
+    }
+}
 
 // Helper to display a little (?) mark which shows a tooltip when hovered.
 // In your own code you may want to display an actual icon if you are using a merged icon fonts (see docs/FONTS.md)
 static void HelpMarker(const char* desc)
 {
-	ImGui::TextDisabled("(?)");
-	if (ImGui::IsItemHovered())
-	{
-		ImGui::BeginTooltip();
-		ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
-		ImGui::TextUnformatted(desc);
-		ImGui::PopTextWrapPos();
-		ImGui::EndTooltip();
-	}
-}
-
-static ImVec4 Darken(ImVec4 const& c, float p)
-{
-	ImVec4 r;
-	r.x = c.x - (c.x * p);
-	r.y = c.y - (c.y * p);
-	r.z = c.z - (c.z * p);
-	r.w = c.w - (c.w * p);
-	return r;
-}
-
-ImVec2 operator-(const ImVec2& l, const ImVec2& r) { return{ l.x - r.x, l.y - r.y }; }
-struct ImRotation
-{
-	ImRotation(ImDrawList* draw_list)
-	{
-		m_draw_list = draw_list;
-		m_start = draw_list->VtxBuffer.Size;
-	}
-
-	ImVec2 Center()
-	{
-		ImVec2 l(FLT_MAX, FLT_MAX), u(-FLT_MAX, -FLT_MAX); // bounds
-
-		const auto& buf = m_draw_list->VtxBuffer;
-		for (int i = m_start; i < buf.Size; i++)
-			l = ImMin(l, buf[i].pos), u = ImMax(u, buf[i].pos);
-
-		return ImVec2((l.x+u.x)/2, (l.y+u.y)/2); // or use _ClipRectStack?
-	}
-
-	void Apply(float rad)
-	{
-		ImVec2 center = Center();
-
-		float s=(float)sin(rad), c=(float)cos(rad);
-		center = ImRotate(center, s, c) - center;
-
-		auto& buf = m_draw_list->VtxBuffer;
-		for (int i = m_start; i < buf.Size; i++)
-			buf[i].pos = ImRotate(buf[i].pos, s, c) - center;
-	}
-
-	ImDrawList* m_draw_list;
-	int m_start;
-};
-
-static void DrawKey(keyboard_t const& kb, float cx, float cy, float r, key_t const& key)
-{
-	const float thickness = 10.0f*kb.m_scale;
-	const float kw = key.m_w * kb.m_scale;
-	const float kh = key.m_h * kb.m_scale;
-	const float rounding = kw / 5.0f;
-	const float x = cx + 4.0f;
-	const float y = cy + 4.0f;
-	const float th = thickness;
-
-	const ImU32 rkeycapcolor = ImColor(key.m_capcolor);
-	ImVec4 dkeyledcolor(key.m_ledcolor);
-	const ImU32 rkeyledcolor1 = ImColor(Darken(key.m_ledcolor, 0.2f));
-	const ImU32 rkeyledcolor2 = ImColor(Darken(key.m_ledcolor, 0.1f));
-	const ImU32 rkeyledcolor3 = ImColor(key.m_ledcolor);
-
-	//draw_list->AddRect(ImVec2(x, y), ImVec2(x + sz, y + sz), rkeyledcolor, rounding, ImDrawFlags_RoundCornersAll, th/1.0f);
-	ImDrawList* draw_list = ImGui::GetWindowDrawList();
-	ImRotation rotation(draw_list);
-
-	draw_list->AddRect(ImVec2(x, y), ImVec2(x + kw, y + kh), (rkeyledcolor1), rounding, ImDrawFlags_None, th/1.0f);
-	draw_list->AddRect(ImVec2(x, y), ImVec2(x + kw, y + kh), (rkeyledcolor2), rounding, ImDrawFlags_None, th/2.0f);
-	draw_list->AddRect(ImVec2(x, y), ImVec2(x + kw, y + kh), (rkeyledcolor3), rounding, ImDrawFlags_None, th/3.0f);
-	draw_list->AddRectFilled(ImVec2(x, y), ImVec2(x + kw, y + kh), rkeycapcolor, rounding, ImDrawFlags_RoundCornersAll);
-
-	rotation.Apply(r);
+    ImGui::TextDisabled("(?)");
+    if (ImGui::IsItemHovered())
+    {
+        ImGui::BeginTooltip();
+        ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+        ImGui::TextUnformatted(desc);
+        ImGui::PopTextWrapPos();
+        ImGui::EndTooltip();
+    }
 }
 
 static void glfw_error_callback(int error, const char* description) { fprintf(stderr, "Glfw Error %d: %s\n", error, description); }
@@ -230,11 +411,11 @@ int main(int, char**)
     // glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // 3.0+ only
 #endif
 
-	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
-	//glfwWindowHint(GLFW_DECORATED, GL_FALSE);
+    glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+    // glfwWindowHint(GLFW_DECORATED, GL_FALSE);
 
     // Create window with graphics context
-    GLFWwindow* window = glfwCreateWindow(2048, 720, "QMK Keymap Wizard", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(2048, 1024, "QMK Keymap Wizard", NULL, NULL);
     if (window == NULL)
         return 1;
     glfwMakeContextCurrent(window);
@@ -277,6 +458,10 @@ int main(int, char**)
     bool   show_another_window = false;
     ImVec4 clear_color         = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
+	static keyboard_t kb;
+	setup(kb);
+	kb.m_scale = io.FontGlobalScale;
+
     // Main loop
     while (!glfwWindowShouldClose(window))
     {
@@ -292,148 +477,98 @@ int main(int, char**)
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-		ImVec2 winSize;
+        ImVec2 winSize;
 
         // 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
         {
             static float f       = 0.0f;
             static int   counter = 0;
 
-			ImGui::SetNextWindowPos( ImVec2(0,0) );
-			ImGui::Begin("Keyboard Wiz", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+            ImGui::SetNextWindowPos(ImVec2(0, 0));
+            ImGui::Begin("Keyboard Wiz", nullptr,
+                         ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoTitleBar |
+                             ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
 
-			ImGui::BeginChildFrame(7, ImVec2(400, 200), 0);
-			
+            ImGui::BeginChildFrame(7, ImVec2(320, 200), 0);
+
             ImGui::Text("counter = %d", counter);
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 
-			const float MIN_SCALE = 0.3f;
-			const float MAX_SCALE = 2.0f;
-			ImGui::DragFloat("global scale", &io.FontGlobalScale, 0.005f, MIN_SCALE, MAX_SCALE, "%.2f", ImGuiSliderFlags_AlwaysClamp); // Scale everything
+            const float MIN_SCALE = 0.3f;
+            const float MAX_SCALE = 2.0f;
+            ImGui::DragFloat("global scale", &io.FontGlobalScale, 0.005f, MIN_SCALE, MAX_SCALE, "%.2f", ImGuiSliderFlags_AlwaysClamp); // Scale everything
 
-			static key_t key;
-			static keyboard_t kb;
-			kb.m_scale = io.FontGlobalScale;
+            static ImGuiColorEditFlags alpha_flags = 0;
+            static ImVec4              keycapcolor = ImVec4(0.25f, 0.25f, 0.25f, 1.0f);
+            ImGui::ColorEdit4("key cap color", (float*)&kb.m_capcolor, ImGuiColorEditFlags_AlphaBar | alpha_flags);
 
-			static ImGuiColorEditFlags alpha_flags = 0;
-			static ImVec4 keycapcolor = ImVec4(0.25f, 0.25f, 0.25f, 1.0f);
-			ImGui::ColorEdit4("key cap color", (float*)&key.m_capcolor, ImGuiColorEditFlags_AlphaBar | alpha_flags);
+            static ImVec4 keyledcolor = ImVec4(1.0f, 0.1f, 0.1f, 1.0f);
+            ImGui::ColorEdit4("key led color", (float*)&kb.m_ledcolor, ImGuiColorEditFlags_AlphaBar | alpha_flags);
 
-			static ImVec4 keyledcolor = ImVec4(1.0f, 0.1f, 0.1f, 1.0f);
-			ImGui::ColorEdit4("key led color", (float*)&key.m_ledcolor, ImGuiColorEditFlags_AlphaBar | alpha_flags);
+            ImGui::EndChildFrame();
 
-			ImGui::EndChildFrame();
+            // Tip: If you do a lot of custom rendering, you probably want to use your own geometrical types and benefit of
+            // overloaded operators, etc. Define IM_VEC2_CLASS_EXTRA in imconfig.h to create implicit conversions between your
+            // types and ImVec2/ImVec4. Dear ImGui defines overloaded operators but they are internal to imgui.cpp and not
+            // exposed outside (to avoid messing with your types) In this example we are not using the maths operators!
 
-			// Tip: If you do a lot of custom rendering, you probably want to use your own geometrical types and benefit of
-			// overloaded operators, etc. Define IM_VEC2_CLASS_EXTRA in imconfig.h to create implicit conversions between your
-			// types and ImVec2/ImVec4. Dear ImGui defines overloaded operators but they are internal to imgui.cpp and not
-			// exposed outside (to avoid messing with your types) In this example we are not using the maths operators!
+            if (ImGui::BeginTabBar("##TabBar"))
+            {
+                if (ImGui::BeginTabItem("QWERTY Layer"))
+                {
+                    ImGui::BeginChildFrame(8, ImVec2(2048, 840), 0);
 
-			if (ImGui::BeginTabBar("##TabBar"))
-			{
-				if (ImGui::BeginTabItem("QWERTY Layer"))
-				{
-					ImGui::BeginChildFrame(8, ImVec2(2048, 640), 0);
+                    ImVec2 p = ImGui::GetCursorScreenPos();
 
-					ImGui::PushItemWidth(-ImGui::GetFontSize() * 15);
-					ImDrawList* draw_list = ImGui::GetWindowDrawList();
+                    ImDrawList* draw_list = ImGui::GetWindowDrawList();
+                    draw_list->AddRectFilled(ImVec2(p.x, p.y), ImVec2(p.x + 2048, p.y + 800), ImColor(26, 26, 26, 256), 0, ImDrawFlags_RoundCornersAll);
+
+                    render(p, kb);
+
+                    ImGui::EndChildFrame();
+                    ImGui::EndTabItem();
+                }
+
+                if (ImGui::BeginTabItem("SYM Layer"))
+                {
+					ImGui::BeginChildFrame(8, ImVec2(2048, 840), 0);
 
 					ImVec2 p = ImGui::GetCursorScreenPos();
 
-					// Draw a bunch of primitives
-					float ks = io.FontGlobalScale;
-					float kw = 80.0f*ks;
-					float kh = 80.0f*ks;
-					float thickness = 10.0f*ks;
-					ImVec4 colf = ImVec4(1.0f, 1.0f, 0.4f, 1.0f);
-					const ImU32 col = ImColor(colf);
-					const float sw = 10.0f;
-					const float sh = 10.0f;
-					const ImDrawFlags corners_tl_br = ImDrawFlags_RoundCornersTopLeft | ImDrawFlags_RoundCornersBottomRight;
-					const float rounding = kw / 5.0f;
-					float th = thickness*2;
+					ImDrawList* draw_list = ImGui::GetWindowDrawList();
+					draw_list->AddRectFilled(ImVec2(p.x, p.y), ImVec2(p.x + 2048, p.y + 800), ImColor(26, 26, 26, 256), 0, ImDrawFlags_RoundCornersAll);
 
-					float x = p.x + 4.0f;
-					float y = p.y + 4.0f;
-
-					draw_list->AddRectFilled(ImVec2(p.x, p.y), ImVec2(p.x + ((kw+sw) * 22), p.y + ((kh+sh)*8)), ImColor(26,26,26,256), 0, ImDrawFlags_RoundCornersAll);
-
-					y = p.y + 4.0f;
-					for (int row = 0; row < 3; ++row)
-					{
-						x = p.x + 4.0f;
-
-						DrawKey(kb, x + kw / 2, y + kh / 2, 0, key);
-						x += kw + sw;
-						DrawKey(kb, x + kw / 2, y + kh / 2, 0, key);
-						x += kw + sw;
-						DrawKey(kb, x + kw / 2, y + kh / 2, 0, key);
-						x += kw + sw;
-						DrawKey(kb, x + kw / 2, y + kh / 2, 0, key);
-						x += kw + sw;
-						DrawKey(kb, x + kw / 2, y + kh / 2, 0, key);
-						x += kw + sw;
-						DrawKey(kb, x + kw / 2, y + kh / 2, 0, key);
-
-						x += kw + sw;
-						x += kw + sw;
-
-						x += kw + sw;
-
-						x += kw + sw;
-						x += kw + sw;
-
-						x += kw + sw;
-						DrawKey(kb, x + kw / 2, y + kh / 2, 0, key);
-						x += kw + sw;
-						DrawKey(kb, x + kw / 2, y + kh / 2, 0, key);
-						x += kw + sw;
-						DrawKey(kb, x + kw / 2, y + kh / 2, 0, key);
-						x += kw + sw;
-						DrawKey(kb, x + kw / 2, y + kh / 2, 0, key);
-						x += kw + sw;
-						DrawKey(kb, x + kw / 2, y + kh / 2, 0, key);
-						x += kw + sw;
-						DrawKey(kb, x + kw / 2, y + kh / 2, 0, key);
-
-						y += kh + sh;
-					}
+					render(p, kb);
 
 					ImGui::EndChildFrame();
 					ImGui::EndTabItem();
 				}
 
-				if (ImGui::BeginTabItem("SYM Layer"))
-				{
-					ImGui::BeginChildFrame(8, ImVec2(2048, 640), 0);
-					
-					// Render the sym layer
+                if (ImGui::BeginTabItem("RAISE Layer"))
+                {
+					ImGui::BeginChildFrame(8, ImVec2(2048, 840), 0);
+
+					ImVec2 p = ImGui::GetCursorScreenPos();
+
+					ImDrawList* draw_list = ImGui::GetWindowDrawList();
+					draw_list->AddRectFilled(ImVec2(p.x, p.y), ImVec2(p.x + 2048, p.y + 800), ImColor(26, 26, 26, 256), 0, ImDrawFlags_RoundCornersAll);
+
+					render(p, kb);
 
 					ImGui::EndChildFrame();
 					ImGui::EndTabItem();
 				}
 
-				if (ImGui::BeginTabItem("RAISE Layer"))
-				{
-					ImGui::BeginChildFrame(8, ImVec2(2048, 640), 0);
-					
-					// Render the raise layer
-
-					ImGui::EndChildFrame();
-					ImGui::EndTabItem();
-				}
-
-				ImGui::EndTabBar();
-			}
-			winSize = ImGui::GetWindowSize();
+                ImGui::EndTabBar();
+            }
+            winSize = ImGui::GetWindowSize();
             ImGui::End();
         }
 
-
-		if (winSize.x < 2048)
-			winSize.x = 2048;
-		if (winSize.y < 720)
-			winSize.y = 720;
+        if (winSize.x < 2048)
+            winSize.x = 2048;
+        if (winSize.y < 1024)
+            winSize.y = 1024;
 
         // Rendering
         ImGui::Render();
@@ -445,9 +580,9 @@ int main(int, char**)
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
         glfwSwapBuffers(window);
-		//glfwSetWindowPos( window, ((int)winSize.x) / 2, ((int)winSize.y) / 2 );
-		glfwSetWindowSize( window, (int)winSize.x, (int)winSize.y ); // Resize
-	}
+        // glfwSetWindowPos( window, ((int)winSize.x) / 2, ((int)winSize.y) / 2 );
+        glfwSetWindowSize(window, (int)winSize.x, (int)winSize.y); // Resize
+    }
 
     // Cleanup
     ImGui_ImplOpenGL3_Shutdown();
