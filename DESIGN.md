@@ -3,8 +3,9 @@
 Language & Framework
 
 - C/C++ and ImGUI (Done)
-- LUA for extensions
+- Features
   - JSON reading and writing
+  - Keymap.c, Layers.h, Keymap.svg generation?
   
 
 Links:
