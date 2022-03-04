@@ -1,3 +1,6 @@
+#include "xbase/x_base.h"
+#include "xbase/x_memory.h"
+
 #include "libimgui/imgui.h"
 #include "libimgui/imgui_internal.h"
 #include "libimgui/imgui_impl_glfw.h"
@@ -21,44 +24,109 @@ struct key_t
         m_label    = "Q";
         m_w        = 80.0f;
         m_h        = 80.0f;
-        m_capcolor = ImVec4(0.25f, 0.25f, 0.25f, 1.0f);
-        m_ledcolor = ImVec4(1.0f, 0.1f, 0.1f, 1.0f);
-        m_txtcolor = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
+        m_capcolor = nullptr;
+        m_ledcolor = nullptr;
+        m_txtcolor = nullptr;
     }
 
-    bool        m_nob;             // home-key (e.g. the F or J key)
-    int         m_index;           // index in keymap
-    const char* m_label;           // label (e.g. "Q")
-    float       m_w;               // key width
-    float       m_h;               // key height
-    bool        m_custom_capcolor; // custom key cap color
-    float       m_capcolor[4];     // color of the key cap
-    bool        m_custom_txtcolor; // custom key txt color
-    float       m_txtcolor[4];     // color of the key label
-    bool        m_custom_ledcolor; // custom key led color
-    float       m_ledcolor[4];     // color of the key led
+    bool        m_nob;           // home-key (e.g. the F or J key)
+    xcore::s16  m_index;         // index in keymap
+    const char* m_label;         // label (e.g. "Q")
+    float       m_w;             // key width
+    float       m_h;             // key height
+    xcore::s8   m_capcolor_size; // should become 3 or 4 (RGB or RGBA)
+    xcore::s8   m_txtcolor_size; //
+    xcore::s8   m_ledcolor_size; //
+    float*      m_capcolor;      // color of the key cap, e.g. [ 0.1, 0.1, 0.1, 1.0 ]
+    float*      m_txtcolor;      // color of the key label
+    float*      m_ledcolor;      // color of the key led
 };
+
+static key_t s_default_key;
+
+// clang-format off
+static JsonMember s_members_key[] = {
+    JsonMember("nob", &s_default_key.m_nob), 
+    JsonMember("index", &s_default_key.m_index), 
+    JsonMember("label", &s_default_key.m_label), 
+    JsonMember("w", &s_default_key.m_w), 
+    JsonMember("h", &s_default_key.m_h),
+    JsonMember("capcolor", &s_default_key.m_capcolor, &s_default_key.m_capcolor_size),
+    JsonMember("txtcolor", &s_default_key.m_txtcolor, &s_default_key.m_txtcolor_size),
+    JsonMember("ledcolor", &s_default_key.m_ledcolor, &s_default_key.m_ledcolor_size),
+};
+// clang-format on
+
+// implementation of the constructor for the key object
+static void* json_construct_key(JsonAllocator* alloc) { return alloc->construct<key_t>(); }
+
+// clang-format off
+static JsonObject json_key = 
+{
+	"key",
+	&s_default_key, 
+	json_construct_key, 
+	sizeof(s_members_key) / sizeof(JsonMember), 
+	s_members_key
+};
+// clang-format on
 
 struct keygroup_t
 {
-    const char* m_name;            // name of this group
-    bool        m_horizontal;      // horizontal or vertical
-    float       m_x;               // x position of this group
-    float       m_y;               // y position of this group
-    int         m_a;               // angle, -45 degrees to 45 degrees (granularity is 1 degree)
-    float       m_w;               // key width
-    float       m_h;               // key height
-    float       m_sw;              // key spacing width
-    float       m_sh;              // key spacing height
-    bool        m_custom_capcolor; // custom key cap color
-    float       m_capcolor[4];     // color of the key cap
-    bool        m_custom_txtcolor; // custom key txt color
-    float       m_txtcolor[4];     // color of the key label
-    bool        m_custom_ledcolor; // custom key led color
-    float       m_ledcolor[4];     // color of the key led
-    int         m_nb_keys;         // number of keys in the array
-    key_t*      m_keys;            // array of keys
+    const char* m_name;       // name of this group
+    float       m_x;          // x position of this group
+    float       m_y;          // y position of this group
+	float       m_w;          // key width
+	float       m_h;          // key height
+	float       m_sw;         // key spacing width
+	float       m_sh;         // key spacing height
+	xcore::s16  m_r;          // rows
+	xcore::s16  m_c;          // columns
+	xcore::s16  m_a;          // angle, -45 degrees to 45 degrees (granularity is 1 degree)
+    xcore::s8   m_capcolor_size;
+    xcore::s8   m_txtcolor_size;
+    xcore::s8   m_ledcolor_size;
+    float*      m_capcolor; // color of the key cap
+    float*      m_txtcolor; // color of the key label
+    float*      m_ledcolor; // color of the key led
+    xcore::s16  m_nb_keys;  // number of keys in the array
+    key_t*      m_keys;     // array of keys
 };
+
+static keygroup_t s_default_keygroup;
+
+// clang-format off
+static JsonMember s_members_keygroup[] = {
+    JsonMember("name", &s_default_keygroup.m_name), 
+    JsonMember("x", &s_default_keygroup.m_x), 
+    JsonMember("y", &s_default_keygroup.m_y),
+	JsonMember("w", &s_default_keygroup.m_w), 
+	JsonMember("h", &s_default_keygroup.m_h), 
+	JsonMember("sw", &s_default_keygroup.m_sw), 
+	JsonMember("sh", &s_default_keygroup.m_sh), 
+	JsonMember("r", &s_default_keygroup.m_r),
+    JsonMember("c", &s_default_keygroup.m_c),
+    JsonMember("a", &s_default_keygroup.m_a), 
+    JsonMember("capcolor", &s_default_keygroup.m_capcolor, &s_default_keygroup.m_capcolor_size), 
+    JsonMember("txtcolor", &s_default_keygroup.m_txtcolor, &s_default_keygroup.m_txtcolor_size), 
+    JsonMember("ledcolor", &s_default_keygroup.m_ledcolor, &s_default_keygroup.m_ledcolor_size), 
+    JsonMember("keys", &s_default_keygroup.m_keys, &s_default_keygroup.m_nb_keys, &json_key), 
+};
+// clang-format on
+
+// implementation of the constructor for the keygroup object
+static void* json_construct_keygroup(JsonAllocator* alloc) { return alloc->construct<keygroup_t>(); }
+
+// clang-format off
+static JsonObject json_keygroup = 
+{
+	"keygroup",
+	&s_default_keygroup, 
+	json_construct_keygroup, 
+	sizeof(s_members_keygroup) / sizeof(JsonMember), 
+	s_members_keygroup
+};
+// clang-format on
 
 /*
 {
@@ -133,39 +201,79 @@ struct keyboard_t
 {
     keyboard_t()
     {
-        m_nb_keygroups = 0;
-        m_scale        = 1.0f;
-        m_w            = 81.f;
-        m_h            = 81.f;
-        m_sw           = 9.f;
-        m_sh           = 9.f;
+        m_nb_keygroups  = 0;
+        m_keygroups     = nullptr;
+        m_capcolor_size = 0;
+        m_txtcolor_size = 0;
+        m_ledcolor_size = 0;
+        m_capcolor      = nullptr;
+        m_txtcolor      = nullptr;
+        m_ledcolor      = nullptr;
+        m_scale         = 1.0f;
+        m_w             = 81.f;
+        m_h             = 81.f;
+        m_sw            = 9.f;
+        m_sh            = 9.f;
     }
 
-    int        m_nb_keygroups;
-    keygroup_t m_keygroup[256];
+    xcore::s16  m_nb_keygroups;
+    keygroup_t* m_keygroups;
 
     // global caps, txt and led color, can be overriden per key
-    float m_capcolor[4];
-    float m_txtcolor[4];
-    float m_ledcolor[4];
-    float m_scale;
-    float m_w;  // key width
-    float m_h;  // key height
-    float m_sw; // key spacing width
-    float m_sh; // key spacing height
+    xcore::s8 m_capcolor_size;
+    xcore::s8 m_txtcolor_size;
+    xcore::s8 m_ledcolor_size;
+    float*     m_capcolor;
+    float*     m_txtcolor;
+    float*     m_ledcolor;
+    float      m_scale;
+    float      m_w;  // key width
+    float      m_h;  // key height
+    float      m_sw; // key spacing width
+    float      m_sh; // key spacing height
 };
+
+static keyboard_t s_default_keyboard;
+
+// clang-format off
+static JsonMember s_members_keyboard[] = {
+    JsonMember("scale", &s_default_keyboard.m_scale), 
+    JsonMember("key_width", &s_default_keyboard.m_w), 
+    JsonMember("key_height", &s_default_keyboard.m_h), 
+    JsonMember("key_spacing_x", &s_default_keyboard.m_sw), 
+    JsonMember("key_spacing_y", &s_default_keyboard.m_sh), 
+    JsonMember("capcolor", &s_default_keyboard.m_capcolor, &s_default_keyboard.m_capcolor_size), 
+    JsonMember("txtcolor", &s_default_keyboard.m_txtcolor, &s_default_keyboard.m_txtcolor_size), 
+    JsonMember("ledcolor", &s_default_keyboard.m_ledcolor, &s_default_keyboard.m_ledcolor_size), 
+    JsonMember("keygroups", &s_default_keyboard.m_keygroups, &s_default_keyboard.m_nb_keygroups, &json_keygroup), 
+};
+// clang-format on
+
+// implementation of the constructor for the keygroup object
+static void* json_construct_keyboard(JsonAllocator* alloc) { return alloc->construct<keyboard_t>(); }
+
+// clang-format off
+static JsonObject json_keyboard = 
+{
+	"keyboard",
+	&s_default_keyboard, 
+	json_construct_keyboard, 
+	sizeof(s_members_keyboard) / sizeof(JsonMember), 
+	s_members_keyboard
+};
+// clang-format on
 
 keygroup_t* new_keygroup(keyboard_t& kb, int num_keys)
 {
-    keygroup_t* k = &kb.m_keygroup[kb.m_nb_keygroups++];
+    keygroup_t* k = &kb.m_keygroups[kb.m_nb_keygroups++];
 
     k->m_name = "";
 
-    k->m_horizontal = true;
-
     k->m_x = 0.f;
     k->m_y = 0.f;
-    k->m_r = 0;
+	k->m_r = 1;
+
+    k->m_a = 0;
 
     k->m_w  = kb.m_w;
     k->m_h  = kb.m_h;
@@ -289,7 +397,7 @@ static void DrawKey(keyboard_t const& kb, float cx, float cy, float r, key_t con
     }
 
     if (key.m_nob)
-        draw_list->AddLine(ImVec2(x - 5, y + 0.5 * hh), ImVec2(x + 5, y + 0.5 * hh), ImColor(255, 255, 255, 255), 2);
+        draw_list->AddLine(ImVec2(x - 5, y + 0.5f * hh), ImVec2(x + 5, y + 0.5f * hh), ImColor(255, 255, 255, 255), 2);
 
     rotation.Apply(r);
 }
@@ -298,12 +406,10 @@ static void DrawKey(keyboard_t const& kb, float cx, float cy, float r, key_t con
 void setup(keyboard_t& kb)
 {
     keygroup_t* l1   = add_keygroup(kb, 0, 12, 24);
-    l1->m_horizontal = false;
     l1->m_x          = 10.f;
     l1->m_y          = 100.f;
 
     keygroup_t* l2        = add_keygroup(kb, 1, 13, 25);
-    l2->m_horizontal      = false;
     l2->m_x               = 10.f + 1 * (kb.m_w + kb.m_sw);
     l2->m_y               = 100.f;
     l2->m_keys[0].m_label = "Q";
@@ -311,110 +417,89 @@ void setup(keyboard_t& kb)
     l2->m_keys[2].m_label = "Z";
 
     keygroup_t* l3   = add_keygroup(kb, 2, 14, 26);
-    l3->m_horizontal = false;
     l3->m_x          = 10.f + 2 * (kb.m_w + kb.m_sw);
     l3->m_y          = 100.f - 60.0f;
 
     keygroup_t* l4   = add_keygroup(kb, 3, 15, 27);
-    l4->m_horizontal = false;
     l4->m_x          = 10.f + 3 * (kb.m_w + kb.m_sw);
     l4->m_y          = 100.f - 90.0f;
 
-    keygroup_t* l5      = add_keygroup(kb, 4, 16, 28);
-    l5->m_horizontal    = false;
-    l5->m_x             = 10.f + 4 * (kb.m_w + kb.m_sw);
-    l5->m_y             = 100.f - 60.0f;
-    l5->m_keys[1].m_nob = true;
+    keygroup_t* l5   = add_keygroup(kb, 4, 16, 28);
+    l5->m_x          = 10.f + 4 * (kb.m_w + kb.m_sw);
+    l5->m_y          = 100.f - 60.0f;
 
     keygroup_t* l6   = add_keygroup(kb, 5, 17, 29);
-    l6->m_horizontal = false;
     l6->m_x          = 10.f + 5 * (kb.m_w + kb.m_sw);
     l6->m_y          = 100.f - 50.0f;
 
     keygroup_t* l7        = new_keygroup(kb, 2);
-    l7->m_horizontal      = false;
     l7->m_x               = 10.f + 6 * (kb.m_w + kb.m_sw);
     l7->m_y               = 100.f + 2 * (kb.m_h + kb.m_sh);
-    l7->m_r               = 30;
+    l7->m_a               = 30;
     l7->m_keys[0].m_label = "Q";
     l7->m_keys[1].m_label = "A";
 
     keygroup_t* l8        = new_keygroup(kb, 2);
-    l8->m_horizontal      = false;
     l8->m_x               = 10.f + 7 * (kb.m_w + kb.m_sw);
     l8->m_y               = 70.f + 3 * (kb.m_h + kb.m_sh);
-    l8->m_r               = 40;
+    l8->m_a               = 40;
     l8->m_keys[0].m_label = "Q";
     l8->m_keys[1].m_label = "A";
 
     // horizontal group of 2 keys
     keygroup_t* l11   = new_keygroup(kb, 2);
-    l11->m_horizontal = true;
     l11->m_x          = 10.f + (kb.m_w / 2.6f) + 2 * (kb.m_w + kb.m_sw);
     l11->m_y          = 100.f - 60.0f + 3 * (kb.m_w + kb.m_sw);
 
     keygroup_t* l0   = new_keygroup(kb, 1);
-    l0->m_horizontal = true;
     l0->m_x          = 10.f + (kb.m_w / 2.6f) + kb.m_sw + 4 * (kb.m_w + kb.m_sw);
     l0->m_y          = 100.f - 50.0f + 3 * (kb.m_w + kb.m_sw);
-    l0->m_r          = 10;
+    l0->m_a          = 10;
 
     keygroup_t* r8   = new_keygroup(kb, 2);
-    r8->m_horizontal = false;
     r8->m_x          = 10.f + 9 * (kb.m_w + kb.m_sw);
     r8->m_y          = 70.f + 3 * (kb.m_h + kb.m_sh);
-    r8->m_r          = -40;
+    r8->m_a          = -40;
 
     keygroup_t* r7   = new_keygroup(kb, 2);
-    r7->m_horizontal = false;
     r7->m_x          = 10.f + 10 * (kb.m_w + kb.m_sw);
     r7->m_y          = 100.f + 2 * (kb.m_h + kb.m_sh);
-    r7->m_r          = -30;
+    r7->m_a          = -30;
 
     keygroup_t* r6   = new_keygroup(kb, 3);
-    r6->m_horizontal = false;
     r6->m_x          = 10.f + 11 * (kb.m_w + kb.m_sw);
     r6->m_y          = 100.f - 50.0f;
 
-    keygroup_t* r5      = new_keygroup(kb, 3);
-    r5->m_horizontal    = false;
-    r5->m_x             = 10.f + 12 * (kb.m_w + kb.m_sw);
-    r5->m_y             = 100.f - 60.0f;
-    r5->m_keys[1].m_nob = true;
+    keygroup_t* r5   = new_keygroup(kb, 3);
+    r5->m_x          = 10.f + 12 * (kb.m_w + kb.m_sw);
+    r5->m_y          = 100.f - 60.0f;
 
     keygroup_t* r4   = new_keygroup(kb, 3);
-    r4->m_horizontal = false;
     r4->m_x          = 10.f + 13 * (kb.m_w + kb.m_sw);
     r4->m_y          = 100.f - 90.0f;
 
     keygroup_t* r3   = new_keygroup(kb, 3);
-    r3->m_horizontal = false;
     r3->m_x          = 10.f + 14 * (kb.m_w + kb.m_sw);
     r3->m_y          = 100.f - 60.0f;
 
     keygroup_t* r2   = new_keygroup(kb, 3);
-    r2->m_horizontal = false;
     r2->m_x          = 10.f + 15 * (kb.m_w + kb.m_sw);
     r2->m_y          = 100.f;
 
     keygroup_t* r1   = new_keygroup(kb, 3);
-    r1->m_horizontal = false;
     r1->m_x          = 10.f + 16 * (kb.m_w + kb.m_sw);
     r1->m_y          = 100.f;
 
     // horizontal group of 2 keys
     keygroup_t* r11   = new_keygroup(kb, 2);
-    r11->m_horizontal = true;
     r11->m_x          = 10.f - (kb.m_w / 2.6f) + 13 * (kb.m_w + kb.m_sw);
     r11->m_y          = 100.f - 60.0f + 3 * (kb.m_w + kb.m_sw);
-    ;
 
     keygroup_t* r0   = new_keygroup(kb, 1);
-    r0->m_horizontal = true;
     r0->m_x          = 10.f - (kb.m_w / 2.6f) - kb.m_sw + 12 * (kb.m_w + kb.m_sw);
     r0->m_y          = 100.f - 50.0f + 3 * (kb.m_w + kb.m_sw);
     ;
-    r0->m_r = -10;
+    r0->m_a = -10;
 }
 
 void render(ImVec2 const& pos, keyboard_t const& kb)
@@ -429,26 +514,18 @@ void render(ImVec2 const& pos, keyboard_t const& kb)
 
     for (int g = 0; g < kb.m_nb_keygroups; g++)
     {
-        keygroup_t const* kg = &kb.m_keygroup[g];
+        keygroup_t const* kg = &kb.m_keygroups[g];
 
         float x = cx + kg->m_x;
         float y = cy + kg->m_y;
 
-        ImVec2 dir(0.0f, 0.0f);
-        if (kg->m_horizontal)
-        {
-            dir.x = 1.0f;
-        }
-        else
-        {
-            dir.y = 1.0f;
-        }
+        ImVec2 dir(0.0f, 1.0f);
 
         float rrad = 0.0f;
-        if (kg->m_r > 0 || kg->m_r < 0)
+        if (kg->m_a > 0 || kg->m_a < 0)
         {
             // convert degrees 'm_r' to radians
-            rrad = (float)3.141592653f * kg->m_r / 180.0f;
+            rrad = (float)3.141592653f * kg->m_a / 180.0f;
             // rotate dir by kg->m_r
             const float s = (float)sin(rrad);
             const float c = (float)cos(rrad);
