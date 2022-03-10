@@ -2,21 +2,22 @@
     "keyboards": [
         {
             "name": "Kyria",
-            "scale": 80,
-            "key_width": 1,
-            "key_height": 1,
+            "scale": 100,
+            "key_width": 1.0,
+            "key_height": 1.0,
             "key_spacing_x": 0.0625,
             "key_spacing_y": 0.0625,
             "cap_color": [25,25,25,255],
             "txt_color": [255,255,255,255],
-            "led_color": [255,255,255,255],
+            "led_color": [25,25,250,255],
             "keygroups": [
                 {
                     "name": "most left two columns",
-                    "x": 1,
+                    "x": 1.0,
                     "y": 1.5,
                     "r": 3,
                     "c": 2,
+                    "a": 0,
                     "keys": [
                         {"index": 0,"label": "Esc"},
                         {"index": 1,"label": "Q"},
@@ -28,7 +29,7 @@
                 },
                 {
                     "name": "third column",
-                    "x": 3,
+                    "x": 3.0,
                     "y": 0.75,
                     "r": 3,
                     "c": 1,
@@ -40,7 +41,7 @@
                 },
                 {
                     "name": "fourth column",
-                    "x": 4,
+                    "x": 4.0,
                     "y": 0.5,
                     "r": 3,
                     "c": 1,
@@ -52,7 +53,7 @@
                 },
                 {
                     "name": "fifth column",
-                    "x": 5,
+                    "x": 5.0,
                     "y": 0.75,
                     "r": 3,
                     "c": 1,
@@ -64,7 +65,7 @@
                 },
                 {
                     "name": "sixth column",
-                    "x": 6,
+                    "x": 6.0,
                     "y": 0.85,
                     "r": 3,
                     "c": 1,
@@ -75,7 +76,7 @@
                     ]
                 },
                 {
-                    "name": "bottom thumb arc, left 2 keys",
+                    "name": "left half, bottom thumb arc, left 2 keys",
                     "x": 3.33,
                     "y": 3.75,
                     "r": 1,
@@ -86,19 +87,19 @@
                     ]
                 },
                 {
-                    "name": "bottom thumb arc, middle key",
-                    "x": 4.5,
-                    "y": 3.75,
+                    "name": "left half, bottom thumb arc, middle key",
+                    "x": 5.45,
+                    "y": 3.9,
                     "r": 1,
                     "c": 1,
-                    "a": 10,
+                    "a": 15,
                     "keys": [
                         {"index": 42,"label": "TB3"}
                     ]
                 },
                 {
-                    "name": "bottom thumb arc, left column",
-                    "x": 7,
+                    "name": "left half, bottom thumb arc, left column",
+                    "x": 7.0,
                     "y": 3.5,
                     "r": 2,
                     "c": 1,
@@ -109,8 +110,8 @@
                     ]
                 },
                 {
-                    "name": "bottom thumb arc, right column",
-                    "x": 8,
+                    "name": "left half, bottom thumb arc, right column",
+                    "x": 8.0,
                     "y": 4.15,
                     "r": 2,
                     "c": 1,
@@ -119,7 +120,121 @@
                         {"index": 32,"label": "TU2"},
                         {"index": 44,"label": "TB5"}
                     ]
+                },
+
+
+
+
+                {
+                    "name": "most right two columns",
+                    "x": 17.0,
+                    "y": 1.5,
+                    "r": 3,
+                    "c": 2,
+                    "keys": [
+                        {"index": 10,"label": "P"},
+                        {"index": 11,"label": "Esc"},
+                        {"index": 22,"label": ";"},
+                        {"index": 23,"label": "Ctrl"},
+                        {"index": 38,"label": "/"},
+                        {"index": 39,"label": "Ins"}
+                    ]
+                },
+                {
+                    "name": "third column",
+                    "x": 16.0,
+                    "y": 0.75,
+                    "r": 3,
+                    "c": 1,
+                    "keys": [
+                        {"index": 9,"label": "O"},
+                        {"index": 21,"label": "L"},
+                        {"index": 38,"label": "."}
+                    ]
+                },
+                {
+                    "name": "fourth column",
+                    "x": 15.0,
+                    "y": 0.5,
+                    "r": 3,
+                    "c": 1,
+                    "keys": [
+                        {"index": 8,"label": "I"},
+                        {"index": 20,"label": "K"},
+                        {"index": 37,"label": ","}
+                    ]
+                },
+                {
+                    "name": "fifth column",
+                    "x": 14.0,
+                    "y": 0.75,
+                    "r": 3,
+                    "c": 1,
+                    "keys": [
+                        {"index": 7,"label": "U"},
+                        {"index": 19,"label": "J"},
+                        {"index": 36,"label": "M"}
+                    ]
+                },
+                {
+                    "name": "sixth column",
+                    "x": 13.0,
+                    "y": 0.85,
+                    "r": 3,
+                    "c": 1,
+                    "keys": [
+                        {"index": 6,"label": "Y"},
+                        {"index": 18,"label": "H"},
+                        {"index": 35,"label": "N"}
+                    ]
+                },
+                {
+                    "name": "right half, bottom thumb arc, right 2 keys",
+                    "x": 14.66,
+                    "y": 3.75,
+                    "r": 1,
+                    "c": 2,
+                    "keys": [
+                        {"index": 49,"label": "TB1"},
+                        {"index": 48,"label": "TB2"}
+                    ]
+                },
+                {
+                    "name": "right half, bottom thumb arc, middle key",
+                    "x": 13.55,
+                    "y": 3.9,
+                    "r": 1,
+                    "c": 1,
+                    "a": -15,
+                    "keys": [
+                        {"index": 47,"label": "TB3"}
+                    ]
+                },
+                {
+                    "name": "right half, bottom thumb arc, right column",
+                    "x": 12.0,
+                    "y": 3.5,
+                    "r": 2,
+                    "c": 1,
+                    "a": -30,
+                    "keys": [
+                        {"index": 34,"label": "TU1"},
+                        {"index": 46,"label": "TB4"}
+                    ]
+                },
+                {
+                    "name": "right half, bottom thumb arc, left most column",
+                    "x": 11.0,
+                    "y": 4.15,
+                    "r": 2,
+                    "c": 1,
+                    "a": -40,
+                    "keys": [
+                        {"index": 33,"label": "TU2"},
+                        {"index": 45,"label": "TB5"}
+                    ]
                 }
+
             ]
         }
     ]

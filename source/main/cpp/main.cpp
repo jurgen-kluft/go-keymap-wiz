@@ -1,7 +1,6 @@
 #include "xbase/x_base.h"
+#include "xbase/x_context.h"
 #include "xbase/x_memory.h"
-
-#include "xjson/x_json_decode.h"
 #include "qmk-keymap-wiz/keyboard.h"
 
 #include "libimgui/imgui.h"
@@ -11,198 +10,15 @@
 
 #include <stdio.h>
 #include <math.h> // sqrtf, powf, cosf, sinf, floorf, ceilf
+#include <ctime>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 #include "libglfw/glfw3.h" // Will drag in system OpenGL headers
 
 #if defined(_MSC_VER) && (_MSC_VER >= 1900) && !defined(IMGUI_DISABLE_WIN32_FUNCTIONS)
 #pragma comment(lib, "legacy_stdio_definitions")
 #endif
-
-namespace xcore
-{
-    static key_t s_default_key;
-
-    // clang-format off
-    static json::JsonFieldDescr s_members_key[] = {
-        json::JsonFieldDescr("nob", s_default_key.m_nob), 
-        json::JsonFieldDescr("index", s_default_key.m_index), 
-        json::JsonFieldDescr("label", s_default_key.m_label), 
-        json::JsonFieldDescr("w", s_default_key.m_w), 
-        json::JsonFieldDescr("h", s_default_key.m_h),
-        json::JsonFieldDescr("cap_color", s_default_key.m_capcolor, s_default_key.m_capcolor_size),
-        json::JsonFieldDescr("txt_color", s_default_key.m_txtcolor, s_default_key.m_txtcolor_size),
-        json::JsonFieldDescr("led_color", s_default_key.m_ledcolor, s_default_key.m_ledcolor_size),
-    };
-
-    static void json_alloc_key(json::JsonAllocator* alloc, s32 n, void*& ptr) { ptr = alloc->AllocateArray<key_t>(n); }
-    static void json_copy_key(void* dst, s32 dst_index, void* src ) { ((key_t*)dst)[dst_index] = *(key_t*)src; }
-
-    static json::JsonTypeDescr json_key = 
-    {
-        "key",
-        &s_default_key, 
-        sizeof(key_t),
-        ALIGNOF(key_t),
-        sizeof(s_members_key) / sizeof(json::JsonFieldDescr), 
-        s_members_key
-    };
-
-    static json::JsonTypeFuncs json_keys_funcs = {
-        json_alloc_key,
-        json_copy_key,
-    };
-    // clang-format on
-
-    static keygroup_t s_default_keygroup;
-
-    // clang-format off
-    static json::JsonFieldDescr s_members_keygroup[] = {
-        json::JsonFieldDescr("name", s_default_keygroup.m_name), 
-        json::JsonFieldDescr("x", s_default_keygroup.m_x), 
-        json::JsonFieldDescr("y", s_default_keygroup.m_y),
-        json::JsonFieldDescr("w", s_default_keygroup.m_w), 
-        json::JsonFieldDescr("h", s_default_keygroup.m_h), 
-        json::JsonFieldDescr("sw", s_default_keygroup.m_sw), 
-        json::JsonFieldDescr("sh", s_default_keygroup.m_sh), 
-        json::JsonFieldDescr("r", s_default_keygroup.m_r),
-        json::JsonFieldDescr("c", s_default_keygroup.m_c),
-        json::JsonFieldDescr("a", s_default_keygroup.m_a),
-        json::JsonFieldDescr("cap_color", s_default_keygroup.m_capcolor, s_default_keygroup.m_capcolor_size), 
-        json::JsonFieldDescr("txt_color", s_default_keygroup.m_txtcolor, s_default_keygroup.m_txtcolor_size), 
-        json::JsonFieldDescr("led_color", s_default_keygroup.m_ledcolor, s_default_keygroup.m_ledcolor_size), 
-        json::JsonFieldDescr("keys", s_default_keygroup.m_keys, s_default_keygroup.m_nb_keys, json_keys_funcs, json_key), 
-    };
-
-    static void json_alloc_keygroup(json::JsonAllocator* alloc, s32 n, void*& ptr) { ptr = alloc->AllocateArray<keygroup_t>(n); }
-    static void json_copy_keygroup(void* dst, s32 dst_index, void* src) { ((keygroup_t*)dst)[dst_index] = *(keygroup_t*)src; }
-
-    static json::JsonTypeDescr json_keygroup = {
-        "keygroup",
-        &s_default_keygroup, 
-        sizeof(keygroup_t),
-        ALIGNOF(keygroup_t),
-        sizeof(s_members_keygroup) / sizeof(json::JsonFieldDescr), 
-        s_members_keygroup
-    };
-
-    static json::JsonTypeFuncs json_keygroup_funcs = {
-        json_alloc_keygroup,
-        json_copy_keygroup,
-    };
-    // clang-format on
-
-    static const float sColorDarkGrey[] = {0.1f, 0.1f, 0.1f, 1.0f};
-    static const float sColorWhite[]    = {1.0f, 1.0f, 1.0f, 1.0f};
-    static const float sColorBlue[]     = {0.0f, 0.0f, 1.0f, 1.0f};
-
-    static keyboard_t s_default_keyboard;
-
-    // clang-format off
-    static json::JsonFieldDescr s_members_keyboard[] = {
-        json::JsonFieldDescr("name", s_default_keyboard.m_name),
-        json::JsonFieldDescr("scale", s_default_keyboard.m_scale), 
-        json::JsonFieldDescr("key_width", s_default_keyboard.m_w), 
-        json::JsonFieldDescr("key_height", s_default_keyboard.m_h), 
-        json::JsonFieldDescr("key_spacing_x", s_default_keyboard.m_sw), 
-        json::JsonFieldDescr("key_spacing_y", s_default_keyboard.m_sh), 
-        json::JsonFieldDescr("cap_color", s_default_keyboard.m_capcolor, 4), 
-        json::JsonFieldDescr("txt_color", s_default_keyboard.m_txtcolor, 4), 
-        json::JsonFieldDescr("led_color", s_default_keyboard.m_ledcolor, 4), 
-        json::JsonFieldDescr("keygroups", s_default_keyboard.m_keygroups, s_default_keyboard.m_nb_keygroups, json_keygroup_funcs, json_keygroup), 
-    };
-    // clang-format on
-
-    // implementation of the constructor for the keygroup object
-    static void json_construct_keyboard(json::JsonAllocator* alloc, s32 n, void*& ptr) { ptr = alloc->AllocateArray<keyboard_t>(n); }
-    static void json_copy_keyboard(void* dst, s32 dst_index, void* src) { ((keyboard_t*)dst)[dst_index] = *(keyboard_t*)src; }
-
-    // clang-format off
-    static json::JsonTypeDescr json_keyboard = 
-    {
-        "keyboard",
-        &s_default_keyboard, 
-        sizeof(keyboard_t),
-        ALIGNOF(keyboard_t),
-        sizeof(s_members_keyboard) / sizeof(json::JsonFieldDescr), 
-        s_members_keyboard
-    };
-
-    static json::JsonTypeFuncs json_keyboard_funcs = {
-        json_construct_keyboard,
-        json_copy_keyboard,
-    };
-
-    static keyboards_t s_default_keyboard_root;
-
-    static json::JsonFieldDescr s_members_keyboard_root[] = {
-        json::JsonFieldDescr("keyboard", s_default_keyboard_root.m_keyboard, json_keyboard_funcs, json_keyboard), 
-    };
-    static json::JsonTypeDescr json_keyboard_root = {
-        "keyboards", 
-        &s_default_keyboard_root, 
-        sizeof(keyboards_t),
-        ALIGNOF(keyboards_t),
-        sizeof(s_members_keyboard_root) / sizeof(json::JsonFieldDescr), 
-        s_members_keyboard_root
-    };
-    // clang-format on
-} // namespace xcore
-
-
-using namespace xcore;
-
-keygroup_t* new_keygroup(keyboard_t& kb, int num_keys)
-{
-    keygroup_t* k = &kb.m_keygroups[kb.m_nb_keygroups++];
-
-    k->m_name = "";
-
-    k->m_x = 0.f;
-    k->m_y = 0.f;
-    k->m_r = 1;
-
-    k->m_a = 0;
-
-    k->m_w  = kb.m_w;
-    k->m_h  = kb.m_h;
-    k->m_sw = kb.m_sw;
-    k->m_sh = kb.m_sh;
-
-    k->m_nb_keys = num_keys;
-    k->m_keys    = new key_t[num_keys];
-
-    return k;
-}
-keygroup_t* add_keygroup(keyboard_t& kb, int k1)
-{
-    keygroup_t* k        = new_keygroup(kb, 1);
-    k->m_keys[0].m_index = k1;
-    return k;
-}
-keygroup_t* add_keygroup(keyboard_t& kb, int k1, int k2)
-{
-    keygroup_t* k        = new_keygroup(kb, 2);
-    k->m_keys[0].m_index = k1;
-    k->m_keys[1].m_index = k2;
-    return k;
-}
-keygroup_t* add_keygroup(keyboard_t& kb, int k1, int k2, int k3)
-{
-    keygroup_t* k        = new_keygroup(kb, 3);
-    k->m_keys[0].m_index = k1;
-    k->m_keys[1].m_index = k2;
-    k->m_keys[2].m_index = k3;
-    return k;
-}
-keygroup_t* add_keygroup(keyboard_t& kb, int k1, int k2, int k3, int k4)
-{
-    keygroup_t* k        = new_keygroup(kb, 4);
-    k->m_keys[0].m_index = k1;
-    k->m_keys[1].m_index = k2;
-    k->m_keys[2].m_index = k3;
-    k->m_keys[3].m_index = k4;
-    return k;
-}
 
 static ImVec4 Darken(ImVec4 const& c, float p)
 {
@@ -250,24 +66,41 @@ struct ImRotation
     int         m_start;
 };
 
-static void DrawKey(keyboard_t const& kb, float cx, float cy, float r, key_t const& key)
+static void DrawKey(xcore::keyboard_t const* kb, xcore::keygroup_t const& kg, xcore::key_t const& key, float globalscale, float x, float y, float r)
 {
-    const float thickness = 10.0f * kb.m_scale;
-    const float kw        = key.m_w * kb.m_scale;
-    const float kh        = key.m_h * kb.m_scale;
-    const float rounding  = kw / 5.0f;
-    const float x         = cx;
-    const float y         = cy;
-    const float hw        = key.m_w / 2;
-    const float hh        = key.m_h / 2;
-    const float th        = thickness;
+    const float sw        = key.m_sw * kg.m_sw * kb->m_sw * kb->m_scale * globalscale;
+    const float sh        = key.m_sh * kg.m_sh * kb->m_sh * kb->m_scale * globalscale;
+    const float kw        = (key.m_w * kg.m_w * kb->m_w * kb->m_scale * globalscale) - (2 * sw);
+    const float kh        = (key.m_h * kg.m_h * kb->m_h * kb->m_scale * globalscale) - (2 * sh);
+    const float rounding  = kw / sw;
+    const float hw        = kw / 2;
+    const float hh        = kh / 2;
+    const float th        = 10.0f * globalscale;
 
-    const ImU32 rkeycapcolor = ImColor(key.m_capcolor);
-    ImVec4      dkeyledcolor(key.m_ledcolor);
-    const ImU32 rkeyledcolor1 = ImColor(Darken(key.m_ledcolor, 0.2f));
-    const ImU32 rkeyledcolor2 = ImColor(Darken(key.m_ledcolor, 0.1f));
-    const ImU32 rkeyledcolor3 = ImColor(key.m_ledcolor);
-    const ImU32 rkeytxtcolor  = ImColor(key.m_txtcolor);
+    const xcore::u8* capcolor = kb->m_capcolor;
+    const xcore::u8* txtcolor = kb->m_txtcolor;
+    const xcore::u8* ledcolor = kb->m_ledcolor;
+
+    if (kg.m_capcolor)
+        capcolor = kg.m_capcolor;
+    if (kg.m_txtcolor)
+        txtcolor = kg.m_txtcolor;
+    if (kg.m_ledcolor)
+        ledcolor = kg.m_ledcolor;
+
+    if (key.m_capcolor)
+        capcolor = key.m_capcolor;
+    if (key.m_txtcolor)
+        txtcolor = key.m_txtcolor;
+    if (key.m_ledcolor)
+        ledcolor = key.m_ledcolor;
+
+    const ImU32 rkeycapcolor = ImColor(capcolor);
+    ImVec4      dkeyledcolor(ledcolor);
+    const ImU32 rkeyledcolor1 = ImColor(Darken(dkeyledcolor, 0.2f));
+    const ImU32 rkeyledcolor2 = ImColor(Darken(dkeyledcolor, 0.1f));
+    const ImU32 rkeyledcolor3 = ImColor(ledcolor);
+    const ImU32 rkeytxtcolor  = ImColor(txtcolor);
 
     // draw_list->AddRect(ImVec2(x, y), ImVec2(x + sz, y + sz), rkeyledcolor, rounding, ImDrawFlags_RoundCornersAll, th/1.0f);
     ImDrawList* draw_list = ImGui::GetWindowDrawList();
@@ -285,148 +118,58 @@ static void DrawKey(keyboard_t const& kb, float cx, float cy, float r, key_t con
     }
 
     if (key.m_nob)
-        draw_list->AddLine(ImVec2(x - 5, y + 0.5f * hh), ImVec2(x + 5, y + 0.5f * hh), ImColor(255, 255, 255, 255), 2);
+        draw_list->AddLine(ImVec2(x - (hw*0.125), y + 0.5f * hh), ImVec2(x + (hw*0.125), y + 0.5f * hh), ImColor(255, 255, 255, 255), 2);
 
     rotation.Apply(r);
 }
 
-// setup a keyboard similar to Kyria
-void setup(keyboard_t& kb)
+void render(ImVec2 const& pos, xcore::keyboard_t const* kb, float globalscale)
 {
-    keygroup_t* l1 = add_keygroup(kb, 0, 12, 24);
-    l1->m_x        = 10.f;
-    l1->m_y        = 100.f;
+    // origin = left/top corner
+    float ox = pos.x + (kb->m_w / 2);
+    float oy = pos.y + (kb->m_h / 2);
 
-    keygroup_t* l2        = add_keygroup(kb, 1, 13, 25);
-    l2->m_x               = 10.f + 1 * (kb.m_w + kb.m_sw);
-    l2->m_y               = 100.f;
-    l2->m_keys[0].m_label = "Q";
-    l2->m_keys[1].m_label = "A";
-    l2->m_keys[2].m_label = "Z";
-
-    keygroup_t* l3 = add_keygroup(kb, 2, 14, 26);
-    l3->m_x        = 10.f + 2 * (kb.m_w + kb.m_sw);
-    l3->m_y        = 100.f - 60.0f;
-
-    keygroup_t* l4 = add_keygroup(kb, 3, 15, 27);
-    l4->m_x        = 10.f + 3 * (kb.m_w + kb.m_sw);
-    l4->m_y        = 100.f - 90.0f;
-
-    keygroup_t* l5 = add_keygroup(kb, 4, 16, 28);
-    l5->m_x        = 10.f + 4 * (kb.m_w + kb.m_sw);
-    l5->m_y        = 100.f - 60.0f;
-
-    keygroup_t* l6 = add_keygroup(kb, 5, 17, 29);
-    l6->m_x        = 10.f + 5 * (kb.m_w + kb.m_sw);
-    l6->m_y        = 100.f - 50.0f;
-
-    keygroup_t* l7        = new_keygroup(kb, 2);
-    l7->m_x               = 10.f + 6 * (kb.m_w + kb.m_sw);
-    l7->m_y               = 100.f + 2 * (kb.m_h + kb.m_sh);
-    l7->m_a               = 30;
-    l7->m_keys[0].m_label = "Q";
-    l7->m_keys[1].m_label = "A";
-
-    keygroup_t* l8        = new_keygroup(kb, 2);
-    l8->m_x               = 10.f + 7 * (kb.m_w + kb.m_sw);
-    l8->m_y               = 70.f + 3 * (kb.m_h + kb.m_sh);
-    l8->m_a               = 40;
-    l8->m_keys[0].m_label = "Q";
-    l8->m_keys[1].m_label = "A";
-
-    // horizontal group of 2 keys
-    keygroup_t* l11 = new_keygroup(kb, 2);
-    l11->m_x        = 10.f + (kb.m_w / 2.6f) + 2 * (kb.m_w + kb.m_sw);
-    l11->m_y        = 100.f - 60.0f + 3 * (kb.m_w + kb.m_sw);
-
-    keygroup_t* l0 = new_keygroup(kb, 1);
-    l0->m_x        = 10.f + (kb.m_w / 2.6f) + kb.m_sw + 4 * (kb.m_w + kb.m_sw);
-    l0->m_y        = 100.f - 50.0f + 3 * (kb.m_w + kb.m_sw);
-    l0->m_a        = 10;
-
-    keygroup_t* r8 = new_keygroup(kb, 2);
-    r8->m_x        = 10.f + 9 * (kb.m_w + kb.m_sw);
-    r8->m_y        = 70.f + 3 * (kb.m_h + kb.m_sh);
-    r8->m_a        = -40;
-
-    keygroup_t* r7 = new_keygroup(kb, 2);
-    r7->m_x        = 10.f + 10 * (kb.m_w + kb.m_sw);
-    r7->m_y        = 100.f + 2 * (kb.m_h + kb.m_sh);
-    r7->m_a        = -30;
-
-    keygroup_t* r6 = new_keygroup(kb, 3);
-    r6->m_x        = 10.f + 11 * (kb.m_w + kb.m_sw);
-    r6->m_y        = 100.f - 50.0f;
-
-    keygroup_t* r5 = new_keygroup(kb, 3);
-    r5->m_x        = 10.f + 12 * (kb.m_w + kb.m_sw);
-    r5->m_y        = 100.f - 60.0f;
-
-    keygroup_t* r4 = new_keygroup(kb, 3);
-    r4->m_x        = 10.f + 13 * (kb.m_w + kb.m_sw);
-    r4->m_y        = 100.f - 90.0f;
-
-    keygroup_t* r3 = new_keygroup(kb, 3);
-    r3->m_x        = 10.f + 14 * (kb.m_w + kb.m_sw);
-    r3->m_y        = 100.f - 60.0f;
-
-    keygroup_t* r2 = new_keygroup(kb, 3);
-    r2->m_x        = 10.f + 15 * (kb.m_w + kb.m_sw);
-    r2->m_y        = 100.f;
-
-    keygroup_t* r1 = new_keygroup(kb, 3);
-    r1->m_x        = 10.f + 16 * (kb.m_w + kb.m_sw);
-    r1->m_y        = 100.f;
-
-    // horizontal group of 2 keys
-    keygroup_t* r11 = new_keygroup(kb, 2);
-    r11->m_x        = 10.f - (kb.m_w / 2.6f) + 13 * (kb.m_w + kb.m_sw);
-    r11->m_y        = 100.f - 60.0f + 3 * (kb.m_w + kb.m_sw);
-
-    keygroup_t* r0 = new_keygroup(kb, 1);
-    r0->m_x        = 10.f - (kb.m_w / 2.6f) - kb.m_sw + 12 * (kb.m_w + kb.m_sw);
-    r0->m_y        = 100.f - 50.0f + 3 * (kb.m_w + kb.m_sw);
-    ;
-    r0->m_a = -10;
-}
-
-void render(ImVec2 const& pos, keyboard_t const& kb)
-{
-    float cx = pos.x + kb.m_sw + kb.m_w;
-    float cy = pos.y + kb.m_sw + kb.m_h;
-
-    // Draw a bunch of primitives
-    float ks = kb.m_scale;
-    float kw = kb.m_w * ks;
-    float kh = kb.m_h * ks;
-
-    for (int g = 0; g < kb.m_nb_keygroups; g++)
+    for (int g = 0; g < kb->m_nb_keygroups; g++)
     {
-        keygroup_t const* kg = &kb.m_keygroups[g];
+        xcore::keygroup_t const& kg = kb->m_keygroups[g];
 
-        float x = cx + kg->m_x;
-        float y = cy + kg->m_y;
+        float gx = ox + (kg.m_x * kb->m_scale * globalscale);
+        float gy = oy + (kg.m_y * kb->m_scale * globalscale);
 
-        ImVec2 dir(0.0f, 1.0f);
+        ImVec2 ydir(0.0f, 1.0f); // down
+        ImVec2 xdir(1.0f, 0.0f); // right
 
         float rrad = 0.0f;
-        if (kg->m_a > 0 || kg->m_a < 0)
+        if (kg.m_a > 0 || kg.m_a < 0)
         {
             // convert degrees 'm_r' to radians
-            rrad = (float)3.141592653f * kg->m_a / 180.0f;
+            rrad = (float)3.141592653f * kg.m_a / 180.0f;
             // rotate dir by kg->m_r
             const float s = (float)sin(rrad);
             const float c = (float)cos(rrad);
-            dir           = ImRotate(dir, c, s);
+            ydir          = ImRotate(ydir, c, s);
+            xdir          = ImRotate(xdir, c, s);
         }
 
-        for (int k = 0; k < kg->m_nb_keys; k++)
+        float rx = gx;
+        float ry = gy;
+        int k = 0;
+        for (int r = 0; r < kg.m_r; r++)
         {
-            key_t const& key = kg->m_keys[k];
-            DrawKey(kb, x - (kw / 2), y - (kh / 2), rrad, key);
+            float cx = rx;
+            float cy = ry;
 
-            x += dir.x * (key.m_w + kg->m_sw);
-            y += dir.y * (key.m_h + kg->m_sh);
+            for (int c = 0; c < kg.m_c; c++)
+            {
+                xcore::key_t const& kc = kg.m_keys[k++];
+                DrawKey(kb, kg, kc, globalscale, cx, cy, rrad);
+
+                cx += xdir.x * (kb->m_w * kg.m_w) * kb->m_scale * globalscale;
+                cy += xdir.y * (kb->m_h * kg.m_h) * kb->m_scale * globalscale;
+            }
+
+            rx += ydir.x * (kb->m_w * kg.m_w) * kb->m_scale * globalscale;
+            ry += ydir.y * (kb->m_h * kg.m_h) * kb->m_scale * globalscale;
         }
     }
 }
@@ -448,8 +191,33 @@ static void HelpMarker(const char* desc)
 
 static void glfw_error_callback(int error, const char* description) { fprintf(stderr, "Glfw Error %d: %s\n", error, description); }
 
+namespace xcore
+{
+    class WizAssertHandler : public xcore::asserthandler_t
+    {
+    public:
+        WizAssertHandler() { NumberOfAsserts = 0; }
+
+        virtual bool handle_assert(u32& flags, const char* fileName, s32 lineNumber, const char* exprString, const char* messageString)
+        {
+            NumberOfAsserts++;
+            return false;
+        }
+
+        xcore::s32 NumberOfAsserts;
+    };
+} // namespace xcore
+
+static xcore::WizAssertHandler gAssertHandler;
+
 int main(int, char**)
 {
+    xbase::init();
+
+#ifdef TARGET_DEBUG
+    xcore::context_t::set_assert_handler(&gAssertHandler);
+#endif
+
     // Setup window
     glfwSetErrorCallback(glfw_error_callback);
     if (!glfwInit())
@@ -525,13 +293,59 @@ int main(int, char**)
     bool   show_another_window = false;
     ImVec4 clear_color         = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
-    static keyboard_t kb;
-    setup(kb);
-    kb.m_scale = io.FontGlobalScale;
+    // Allocate memory for the main and scratch allocators
+    //
+    xcore::u32 const main_allocator_size      = 1024 * 1024;
+    xcore::u32 const scratch_allocator_size   = 1024 * 1024;
+    void*     main1_allocator_memory    = malloc(main_allocator_size);
+    void*     main2_allocator_memory    = malloc(main_allocator_size);
+    void*     scratch_allocator_memory = malloc(scratch_allocator_size);
+    void*     main_allocator_memory    = main1_allocator_memory;
+
+    const char* kbdb_filename = "kbdb/kb.json";
+    
+    // see if file has changed
+    struct stat kbdb_file_state;
+    stat(kbdb_filename, &kbdb_file_state);
+
+    xcore::keyboards_t* keebs = xcore::load_keyboards(main_allocator_memory, main_allocator_size, scratch_allocator_memory, scratch_allocator_size, "kbdb/kb.json");
+    xcore::keyboard_t* kb = &keebs->m_keyboards[0];
 
     // Main loop
+
+    time_t last_file_poll = time(nullptr);   
     while (!glfwWindowShouldClose(window))
     {
+        // only check every second on the clock if the file has changed
+        time_t now = time(nullptr);
+        if (now - last_file_poll > 1)
+        {
+            struct stat kbdb_file_state_updated;
+            if (stat(kbdb_filename, &kbdb_file_state_updated) == 0)
+            {
+                if (kbdb_file_state_updated.st_mtime > kbdb_file_state.st_mtime)
+                {
+                    if (main_allocator_memory == main1_allocator_memory)
+                    {
+                        main_allocator_memory = main2_allocator_memory;
+                    }
+                    else
+                    {
+                        main_allocator_memory = main1_allocator_memory;
+                    }
+
+                    kbdb_file_state = kbdb_file_state_updated;
+                    xcore::keyboards_t* keebs_updated = xcore::load_keyboards(main_allocator_memory, main_allocator_size, scratch_allocator_memory, scratch_allocator_size, kbdb_filename);
+                    if (keebs_updated!=nullptr)
+                    {
+                        keebs = keebs_updated;
+                        kb = &keebs->m_keyboards[0];
+                    }
+                }
+            }
+            last_file_poll = time(nullptr);   
+        }
+
         // Poll and handle events (inputs, window resize, etc.)
         // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
         // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application.
@@ -566,10 +380,10 @@ int main(int, char**)
 
             static ImGuiColorEditFlags alpha_flags = 0;
             static ImVec4              keycapcolor = ImVec4(0.25f, 0.25f, 0.25f, 1.0f);
-            ImGui::ColorEdit4("key cap color", (float*)&kb.m_capcolor, ImGuiColorEditFlags_AlphaBar | alpha_flags);
+            ImGui::ColorEdit4("key cap color", (float*)&kb->m_capcolor, ImGuiColorEditFlags_AlphaBar | alpha_flags);
 
             static ImVec4 keyledcolor = ImVec4(1.0f, 0.1f, 0.1f, 1.0f);
-            ImGui::ColorEdit4("key led color", (float*)&kb.m_ledcolor, ImGuiColorEditFlags_AlphaBar | alpha_flags);
+            ImGui::ColorEdit4("key led color", (float*)&kb->m_ledcolor, ImGuiColorEditFlags_AlphaBar | alpha_flags);
 
             ImGui::EndChildFrame();
 
@@ -589,7 +403,7 @@ int main(int, char**)
                     ImDrawList* draw_list = ImGui::GetWindowDrawList();
                     draw_list->AddRectFilled(ImVec2(p.x, p.y), ImVec2(p.x + 2048, p.y + 800), ImColor(26, 26, 26, 256), 0, ImDrawFlags_RoundCornersAll);
 
-                    render(p, kb);
+                    render(p, kb, io.FontGlobalScale);
 
                     ImGui::EndChildFrame();
                     ImGui::EndTabItem();
@@ -604,7 +418,7 @@ int main(int, char**)
                     ImDrawList* draw_list = ImGui::GetWindowDrawList();
                     draw_list->AddRectFilled(ImVec2(p.x, p.y), ImVec2(p.x + 2048, p.y + 800), ImColor(26, 26, 26, 256), 0, ImDrawFlags_RoundCornersAll);
 
-                    render(p, kb);
+                    render(p, kb, io.FontGlobalScale);
 
                     ImGui::EndChildFrame();
                     ImGui::EndTabItem();
@@ -619,7 +433,7 @@ int main(int, char**)
                     ImDrawList* draw_list = ImGui::GetWindowDrawList();
                     draw_list->AddRectFilled(ImVec2(p.x, p.y), ImVec2(p.x + 2048, p.y + 800), ImColor(26, 26, 26, 256), 0, ImDrawFlags_RoundCornersAll);
 
-                    render(p, kb);
+                    render(p, kb, io.FontGlobalScale);
 
                     ImGui::EndChildFrame();
                     ImGui::EndTabItem();
