@@ -105,7 +105,7 @@
                     "c": 1,
                     "a": 30,
                     "keys": [
-                        {"index": 31,"label": "TU1"},
+                        {"index": 30,"label": "TU1"},
                         {"index": 43,"label": "TB4"}
                     ]
                 },
@@ -117,7 +117,7 @@
                     "c": 1,
                     "a": 40,
                     "keys": [
-                        {"index": 32,"label": "TU2"},
+                        {"index": 31,"label": "TU2"},
                         {"index": 44,"label": "TB5"}
                     ]
                 },
@@ -149,7 +149,7 @@
                     "keys": [
                         {"index": 9,"label": "O"},
                         {"index": 21,"label": "L"},
-                        {"index": 38,"label": "."}
+                        {"index": 37,"label": "."}
                     ]
                 },
                 {
@@ -161,7 +161,7 @@
                     "keys": [
                         {"index": 8,"label": "I"},
                         {"index": 20,"label": "K"},
-                        {"index": 37,"label": ","}
+                        {"index": 36,"label": ","}
                     ]
                 },
                 {
@@ -173,7 +173,7 @@
                     "keys": [
                         {"index": 7,"label": "U"},
                         {"index": 19,"label": "J"},
-                        {"index": 36,"label": "M"}
+                        {"index": 35,"label": "M"}
                     ]
                 },
                 {
@@ -185,7 +185,7 @@
                     "keys": [
                         {"index": 6,"label": "Y"},
                         {"index": 18,"label": "H"},
-                        {"index": 35,"label": "N"}
+                        {"index": 34,"label": "N"}
                     ]
                 },
                 {
@@ -218,7 +218,7 @@
                     "c": 1,
                     "a": -30,
                     "keys": [
-                        {"index": 34,"label": "TU1"},
+                        {"index": 33,"label": "TU1"},
                         {"index": 46,"label": "TB4"}
                     ]
                 },
@@ -230,7 +230,7 @@
                     "c": 1,
                     "a": -40,
                     "keys": [
-                        {"index": 33,"label": "TU2"},
+                        {"index": 32,"label": "TU2"},
                         {"index": 45,"label": "TB5"}
                     ]
                 }

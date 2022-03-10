@@ -66,8 +66,24 @@ struct ImRotation
     int         m_start;
 };
 
-static void DrawKey(xcore::keyboard_t const* kb, xcore::keygroup_t const& kg, xcore::key_t const& key, float globalscale, float x, float y, float r)
+static bool IsInsideKey(xcore::keyboard_t const* kb, xcore::keygroup_t const& kg, xcore::key_t const& key, float globalscale, float x, float y, float px, float py)
 {
+    const float sw        = key.m_sw * kg.m_sw * kb->m_sw * kb->m_scale * globalscale;
+    const float sh        = key.m_sh * kg.m_sh * kb->m_sh * kb->m_scale * globalscale;
+    const float kw        = (key.m_w * kg.m_w * kb->m_w * kb->m_scale * globalscale) - (2 * sw);
+    const float kh        = (key.m_h * kg.m_h * kb->m_h * kb->m_scale * globalscale) - (2 * sh);
+    const float hw        = kw / 2;
+    const float hh        = kh / 2;
+    if (px >= (x - hw) && px <= (x + hw) && py >= (y - hh) && py <= (y + hh))
+        return true;
+    return false;
+}
+
+static void DrawKey(xcore::keyboard_t const* kb, xcore::keygroup_t const& kg, xcore::key_t const& key, float globalscale, float x, float y, float r, bool highlight)
+{
+    if (highlight)
+        globalscale *= 1.2f;
+
     const float sw        = key.m_sw * kg.m_sw * kb->m_sw * kb->m_scale * globalscale;
     const float sh        = key.m_sh * kg.m_sh * kb->m_sh * kb->m_scale * globalscale;
     const float kw        = (key.m_w * kg.m_w * kb->m_w * kb->m_scale * globalscale) - (2 * sw);
@@ -123,11 +139,13 @@ static void DrawKey(xcore::keyboard_t const* kb, xcore::keygroup_t const& kg, xc
     rotation.Apply(r);
 }
 
-void render(ImVec2 const& pos, xcore::keyboard_t const* kb, float globalscale)
+void render(xcore::keyboard_t const* kb, float posx, float posy, float mousex, float mousey, float globalscale)
 {
     // origin = left/top corner
-    float ox = pos.x + (kb->m_w / 2);
-    float oy = pos.y + (kb->m_h / 2);
+    float ox = posx + (kb->m_w / 2);
+    float oy = posy + (kb->m_h / 2);
+
+    int highlighted_key_index = -1;
 
     for (int g = 0; g < kb->m_nb_keygroups; g++)
     {
@@ -138,6 +156,8 @@ void render(ImVec2 const& pos, xcore::keyboard_t const* kb, float globalscale)
 
         ImVec2 ydir(0.0f, 1.0f); // down
         ImVec2 xdir(1.0f, 0.0f); // right
+
+        ImVec2 mdir(mousex-gx, mousey-gy);
 
         float rrad = 0.0f;
         if (kg.m_a > 0 || kg.m_a < 0)
@@ -151,9 +171,42 @@ void render(ImVec2 const& pos, xcore::keyboard_t const* kb, float globalscale)
             xdir          = ImRotate(xdir, c, s);
         }
 
+        if (kg.m_a > 0 || kg.m_a < 0)
+        {
+            float rot = (float)-3.141592653f * kg.m_a / 180.0f;
+            const float s = (float)sin(rot);
+            const float c = (float)cos(rot);
+            mdir          = ImRotate(mdir, c, s);
+        }
+
+        float mx = gx + mdir.x;
+        float my = gy + mdir.y;
+
         float rx = gx;
         float ry = gy;
         int k = 0;
+        for (int r = 0; r < kg.m_r && highlighted_key_index == -1; r++)
+        {
+            float cx = rx;
+            float cy = ry;
+
+            for (int c = 0; c < kg.m_c && highlighted_key_index == -1; c++)
+            {
+                xcore::key_t const& kc = kg.m_keys[k++];
+                if (IsInsideKey(kb, kg, kc, globalscale, cx, cy, mx, my))
+                {
+                    highlighted_key_index = kc.m_index;
+                    break;
+                }
+                cx += (kb->m_w * kg.m_w) * kb->m_scale * globalscale;
+            }
+
+            ry += (kb->m_h * kg.m_h) * kb->m_scale * globalscale;
+        }
+ 
+        rx = gx;
+        ry = gy;
+        k = 0;
         for (int r = 0; r < kg.m_r; r++)
         {
             float cx = rx;
@@ -162,7 +215,7 @@ void render(ImVec2 const& pos, xcore::keyboard_t const* kb, float globalscale)
             for (int c = 0; c < kg.m_c; c++)
             {
                 xcore::key_t const& kc = kg.m_keys[k++];
-                DrawKey(kb, kg, kc, globalscale, cx, cy, rrad);
+                DrawKey(kb, kg, kc, globalscale, cx, cy, rrad, kc.m_index == highlighted_key_index);
 
                 cx += xdir.x * (kb->m_w * kg.m_w) * kb->m_scale * globalscale;
                 cy += xdir.y * (kb->m_h * kg.m_h) * kb->m_scale * globalscale;
@@ -171,8 +224,10 @@ void render(ImVec2 const& pos, xcore::keyboard_t const* kb, float globalscale)
             rx += ydir.x * (kb->m_w * kg.m_w) * kb->m_scale * globalscale;
             ry += ydir.y * (kb->m_h * kg.m_h) * kb->m_scale * globalscale;
         }
+
     }
 }
+
 
 // Helper to display a little (?) mark which shows a tooltip when hovered.
 // In your own code you may want to display an actual icon if you are using a merged icon fonts (see docs/FONTS.md)
@@ -403,7 +458,7 @@ int main(int, char**)
                     ImDrawList* draw_list = ImGui::GetWindowDrawList();
                     draw_list->AddRectFilled(ImVec2(p.x, p.y), ImVec2(p.x + 2048, p.y + 800), ImColor(26, 26, 26, 256), 0, ImDrawFlags_RoundCornersAll);
 
-                    render(p, kb, io.FontGlobalScale);
+                    render(kb, p.x, p.y, io.MousePos.x, io.MousePos.y, io.FontGlobalScale);
 
                     ImGui::EndChildFrame();
                     ImGui::EndTabItem();
@@ -418,7 +473,7 @@ int main(int, char**)
                     ImDrawList* draw_list = ImGui::GetWindowDrawList();
                     draw_list->AddRectFilled(ImVec2(p.x, p.y), ImVec2(p.x + 2048, p.y + 800), ImColor(26, 26, 26, 256), 0, ImDrawFlags_RoundCornersAll);
 
-                    render(p, kb, io.FontGlobalScale);
+                    render(kb, p.x, p.y, io.MousePos.x, io.MousePos.y, io.FontGlobalScale);
 
                     ImGui::EndChildFrame();
                     ImGui::EndTabItem();
@@ -433,7 +488,7 @@ int main(int, char**)
                     ImDrawList* draw_list = ImGui::GetWindowDrawList();
                     draw_list->AddRectFilled(ImVec2(p.x, p.y), ImVec2(p.x + 2048, p.y + 800), ImColor(26, 26, 26, 256), 0, ImDrawFlags_RoundCornersAll);
 
-                    render(p, kb, io.FontGlobalScale);
+                    render(kb, p.x, p.y, io.MousePos.x, io.MousePos.y, io.FontGlobalScale);
 
                     ImGui::EndChildFrame();
                     ImGui::EndTabItem();
