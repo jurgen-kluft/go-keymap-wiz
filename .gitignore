@@ -12,6 +12,7 @@ target/
 !*.c
 !*.h
 !*.inl
+!*.json
 
 !*.build
 

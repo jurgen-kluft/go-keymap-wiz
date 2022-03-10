@@ -1,0 +1,126 @@
+{
+    "keyboards": [
+        {
+            "name": "Kyria",
+            "scale": 80,
+            "key_width": 1,
+            "key_height": 1,
+            "key_spacing_x": 0.0625,
+            "key_spacing_y": 0.0625,
+            "cap_color": [25,25,25,255],
+            "txt_color": [255,255,255,255],
+            "led_color": [255,255,255,255],
+            "keygroups": [
+                {
+                    "name": "most left two columns",
+                    "x": 1,
+                    "y": 1.5,
+                    "r": 3,
+                    "c": 2,
+                    "keys": [
+                        {"index": 0,"label": "Esc"},
+                        {"index": 1,"label": "Q"},
+                        {"index": 12,"label": "Caps"},
+                        {"index": 13,"label": "A"},
+                        {"index": 24,"label": "Shift"},
+                        {"index": 25,"label": "Z"}
+                    ]
+                },
+                {
+                    "name": "third column",
+                    "x": 3,
+                    "y": 0.75,
+                    "r": 3,
+                    "c": 1,
+                    "keys": [
+                        {"index": 2,"label": "W"},
+                        {"index": 14,"label": "S"},
+                        {"index": 26,"label": "X"}
+                    ]
+                },
+                {
+                    "name": "fourth column",
+                    "x": 4,
+                    "y": 0.5,
+                    "r": 3,
+                    "c": 1,
+                    "keys": [
+                        {"index": 3,"label": "E"},
+                        {"index": 15,"label": "D"},
+                        {"index": 27,"label": "C"}
+                    ]
+                },
+                {
+                    "name": "fifth column",
+                    "x": 5,
+                    "y": 0.75,
+                    "r": 3,
+                    "c": 1,
+                    "keys": [
+                        {"index": 4,"label": "R"},
+                        {"index": 16,"label": "F"},
+                        {"index": 28,"label": "V"}
+                    ]
+                },
+                {
+                    "name": "sixth column",
+                    "x": 6,
+                    "y": 0.85,
+                    "r": 3,
+                    "c": 1,
+                    "keys": [
+                        {"index": 5,"label": "T"},
+                        {"index": 17,"label": "G"},
+                        {"index": 29,"label": "B"}
+                    ]
+                },
+                {
+                    "name": "bottom thumb arc, left 2 keys",
+                    "x": 3.33,
+                    "y": 3.75,
+                    "r": 1,
+                    "c": 2,
+                    "keys": [
+                        {"index": 40,"label": "TB1"},
+                        {"index": 41,"label": "TB2"}
+                    ]
+                },
+                {
+                    "name": "bottom thumb arc, middle key",
+                    "x": 4.5,
+                    "y": 3.75,
+                    "r": 1,
+                    "c": 1,
+                    "a": 10,
+                    "keys": [
+                        {"index": 42,"label": "TB3"}
+                    ]
+                },
+                {
+                    "name": "bottom thumb arc, left column",
+                    "x": 7,
+                    "y": 3.5,
+                    "r": 2,
+                    "c": 1,
+                    "a": 30,
+                    "keys": [
+                        {"index": 31,"label": "TU1"},
+                        {"index": 43,"label": "TB4"}
+                    ]
+                },
+                {
+                    "name": "bottom thumb arc, right column",
+                    "x": 8,
+                    "y": 4.15,
+                    "r": 2,
+                    "c": 1,
+                    "a": 40,
+                    "keys": [
+                        {"index": 32,"label": "TU2"},
+                        {"index": 44,"label": "TB5"}
+                    ]
+                }
+            ]
+        }
+    ]
+}
