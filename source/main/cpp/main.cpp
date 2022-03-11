@@ -20,6 +20,13 @@
 #pragma comment(lib, "legacy_stdio_definitions")
 #endif
 
+ImFont* Fonts[] = { 
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+ };
+
 static ImVec4 Darken(ImVec4 const& c, float p)
 {
     ImVec4 r;
@@ -28,6 +35,14 @@ static ImVec4 Darken(ImVec4 const& c, float p)
     r.z = c.z - (c.z * p);
     r.w = c.w - (c.w * p);
     return r;
+}
+
+static void GetColor(ImVec4& c, xcore::u8* color)
+{
+    color[0] = (xcore::u8)(c.x * 255.0f);
+    color[1] = (xcore::u8)(c.y * 255.0f);
+    color[2] = (xcore::u8)(c.z * 255.0f);
+    color[3] = (xcore::u8)(c.w * 255.0f);
 }
 
 ImVec2 operator-(const ImVec2& l, const ImVec2& r) { return {l.x - r.x, l.y - r.y}; }
@@ -77,6 +92,34 @@ static bool IsInsideKey(xcore::keyboard_t const* kb, xcore::keygroup_t const& kg
     if (px >= (x - hw) && px <= (x + hw) && py >= (y - hh) && py <= (y + hh))
         return true;
     return false;
+}
+
+static ImVec2 SelectFontSize(const char* txt, float kw)
+{
+    ImGui::PushFont(Fonts[0]);
+    ImVec2 td = ImGui::CalcTextSize(txt);
+    if ((td.x * 1.1f) >= kw)
+    {
+        ImGui::PopFont();
+
+        ImGui::PushFont(Fonts[1]);
+        td = ImGui::CalcTextSize(txt);
+        if ((td.x * 1.1f) >= kw)
+        {
+            ImGui::PopFont();
+
+            ImGui::PushFont(Fonts[2]);
+            td = ImGui::CalcTextSize(txt);
+            if ((td.x * 1.1f) >= kw)
+            {
+                ImGui::PopFont();
+
+                ImGui::PushFont(Fonts[3]);
+                td = ImGui::CalcTextSize(txt);
+            }
+        }
+    }
+    return td;
 }
 
 static void DrawKey(xcore::keyboard_t const* kb, xcore::keygroup_t const& kg, xcore::key_t const& key, float globalscale, float x, float y, float r, bool highlight)
@@ -129,8 +172,48 @@ static void DrawKey(xcore::keyboard_t const* kb, xcore::keygroup_t const& kg, xc
 
     if (key.m_label != nullptr)
     {
-        ImVec2 td = ImGui::CalcTextSize(key.m_label);
-        draw_list->AddText(ImVec2(x - (td.x / 2), y - (td.y / 2)), rkeytxtcolor, key.m_label);
+        /*
+        < ,
+         
+        */
+       char   text[128];
+       char* lines[4] = { nullptr, nullptr, nullptr, nullptr };
+        
+
+        int num_lines = 0;
+        int i = 0;
+        lines[num_lines++] = text;
+        while (key.m_label[i] != 0)
+        {
+            if (key.m_label[i] == ' ')
+            {
+                text[i] = 0;
+                lines[num_lines++] = (text + i + 1);
+                text[i+1] = 0;
+            } else {
+                text[i] = key.m_label[i];
+                text[i+1] = 0;
+            }
+            i++;
+        }
+
+        if (num_lines == 1)
+        {
+            ImVec2 td = SelectFontSize(key.m_label, kw);
+            draw_list->AddText(ImVec2(x - (td.x / 2), y - (td.y / 2)), rkeytxtcolor, key.m_label);
+            ImGui::PopFont();
+        }
+        else if (num_lines == 2)
+        {
+            // Push/Pop another smaller font
+            ImVec2 td1 = SelectFontSize(lines[0], kw);
+            draw_list->AddText(ImVec2(x - (td1.x / 2), y - (td1.y * 1.1f)), rkeytxtcolor, lines[0]);
+            ImGui::PopFont();
+
+            ImVec2 td2 = SelectFontSize(lines[1], kw);
+            draw_list->AddText(ImVec2(x - (td2.x / 2), y + (td2.y * 0.1f)), rkeytxtcolor, lines[1]);
+            ImGui::PopFont();
+        }
     }
 
     if (key.m_nob)
@@ -335,8 +418,48 @@ int main(int, char**)
     // ImGui_ImplXXXX_NewFrame below will call.
     // - Read 'docs/FONTS.md' for more instructions and details.
     // - Remember that in C/C++ if you want to include a backslash \ in a string literal you need to write a double backslash \\ !
-    // io.Fonts->AddFontDefault();
-    io.Fonts->AddFontFromFileTTF("fonts/Roboto-Medium.ttf", 28.0f);
+    
+    io.Fonts->AddFontDefault();
+
+    static const ImWchar icon_ranges[] =
+    {
+        0xf000, 0xf3ff,
+        0,
+    };
+    static const ImWchar symbol_ranges[] =
+    {
+        0x2300, 0x23ff,
+        0,
+    };
+    static const ImWchar base_ranges[] =
+    {
+        0x0020, 0x00ff,
+        0,
+    };
+
+    ImFontConfig config;
+    config.MergeMode = true;    
+
+    Fonts[0] = io.Fonts->AddFontFromFileTTF("fonts/Roboto-Medium.ttf", 28.0f, nullptr, &base_ranges[0]);
+    io.Fonts->AddFontFromFileTTF("fonts/freeserif.ttf", 34.0f, &config, &symbol_ranges[0]);
+    io.Fonts->AddFontFromFileTTF("fonts/fontawesome-webfont.ttf", 28.0f, &config, &icon_ranges[0]);
+    io.Fonts->Build();
+
+    Fonts[1] = io.Fonts->AddFontFromFileTTF("fonts/Roboto-Medium.ttf", 24.0f, nullptr, &base_ranges[0]);
+    io.Fonts->AddFontFromFileTTF("fonts/freeserif.ttf", 24.0f, &config, &symbol_ranges[0]);
+    io.Fonts->AddFontFromFileTTF("fonts/fontawesome-webfont.ttf", 24.0f, &config, &icon_ranges[0]);
+    io.Fonts->Build();
+
+    Fonts[2] = io.Fonts->AddFontFromFileTTF("fonts/Roboto-Medium.ttf", 20.0f, nullptr, &base_ranges[0]);
+    io.Fonts->AddFontFromFileTTF("fonts/freeserif.ttf", 20.0f, &config, &symbol_ranges[0]);
+    io.Fonts->AddFontFromFileTTF("fonts/fontawesome-webfont.ttf", 20.0f, &config, &icon_ranges[0]);
+    io.Fonts->Build();
+
+    Fonts[3] = io.Fonts->AddFontFromFileTTF("fonts/Roboto-Medium.ttf", 16.0f, nullptr, &base_ranges[0]);
+    io.Fonts->AddFontFromFileTTF("fonts/freeserif.ttf", 16.0f, &config, &symbol_ranges[0]);
+    io.Fonts->AddFontFromFileTTF("fonts/fontawesome-webfont.ttf", 16.0f, &config, &icon_ranges[0]);
+    io.Fonts->Build();
+
     // io.Fonts->AddFontFromFileTTF("../../misc/fonts/Cousine-Regular.ttf", 15.0f);
     // io.Fonts->AddFontFromFileTTF("../../misc/fonts/DroidSans.ttf", 16.0f);
     // io.Fonts->AddFontFromFileTTF("../../misc/fonts/ProggyTiny.ttf", 10.0f);
@@ -415,7 +538,6 @@ int main(int, char**)
 
         ImVec2 winSize;
 
-        // 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
         {
             static float f       = 0.0f;
             static int   counter = 0;
@@ -429,16 +551,19 @@ int main(int, char**)
             ImGui::Text("counter = %d", counter);
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 
-            const float MIN_SCALE = 0.3f;
-            const float MAX_SCALE = 2.0f;
+            const float MIN_SCALE = 0.7f;
+            const float MAX_SCALE = 1.5f;
             ImGui::DragFloat("global scale", &io.FontGlobalScale, 0.005f, MIN_SCALE, MAX_SCALE, "%.2f", ImGuiSliderFlags_AlwaysClamp); // Scale everything
 
             static ImGuiColorEditFlags alpha_flags = 0;
             static ImVec4              keycapcolor = ImVec4(0.25f, 0.25f, 0.25f, 1.0f);
-            ImGui::ColorEdit4("key cap color", (float*)&kb->m_capcolor, ImGuiColorEditFlags_AlphaBar | alpha_flags);
+            ImGui::ColorEdit4("key cap color", (float*)&keycapcolor, ImGuiColorEditFlags_AlphaBar | alpha_flags);
 
             static ImVec4 keyledcolor = ImVec4(1.0f, 0.1f, 0.1f, 1.0f);
-            ImGui::ColorEdit4("key led color", (float*)&kb->m_ledcolor, ImGuiColorEditFlags_AlphaBar | alpha_flags);
+            ImGui::ColorEdit4("key led color", (float*)&keyledcolor, ImGuiColorEditFlags_AlphaBar | alpha_flags);
+
+            GetColor(keycapcolor, kb->m_capcolor);
+            GetColor(keyledcolor, kb->m_ledcolor);
 
             ImGui::EndChildFrame();
 
@@ -449,6 +574,8 @@ int main(int, char**)
 
             if (ImGui::BeginTabBar("##TabBar"))
             {
+                ImColor tabkgrndcolor(10,10,10,256);
+
                 if (ImGui::BeginTabItem("QWERTY Layer"))
                 {
                     ImGui::BeginChildFrame(8, ImVec2(2048, 840), 0);
@@ -456,7 +583,7 @@ int main(int, char**)
                     ImVec2 p = ImGui::GetCursorScreenPos();
 
                     ImDrawList* draw_list = ImGui::GetWindowDrawList();
-                    draw_list->AddRectFilled(ImVec2(p.x, p.y), ImVec2(p.x + 2048, p.y + 800), ImColor(26, 26, 26, 256), 0, ImDrawFlags_RoundCornersAll);
+                    draw_list->AddRectFilled(ImVec2(p.x, p.y), ImVec2(p.x + 2048, p.y + 800), tabkgrndcolor, 0, ImDrawFlags_RoundCornersAll);
 
                     render(kb, p.x, p.y, io.MousePos.x, io.MousePos.y, io.FontGlobalScale);
 
@@ -471,7 +598,7 @@ int main(int, char**)
                     ImVec2 p = ImGui::GetCursorScreenPos();
 
                     ImDrawList* draw_list = ImGui::GetWindowDrawList();
-                    draw_list->AddRectFilled(ImVec2(p.x, p.y), ImVec2(p.x + 2048, p.y + 800), ImColor(26, 26, 26, 256), 0, ImDrawFlags_RoundCornersAll);
+                    draw_list->AddRectFilled(ImVec2(p.x, p.y), ImVec2(p.x + 2048, p.y + 800), tabkgrndcolor, 0, ImDrawFlags_RoundCornersAll);
 
                     render(kb, p.x, p.y, io.MousePos.x, io.MousePos.y, io.FontGlobalScale);
 
@@ -486,7 +613,7 @@ int main(int, char**)
                     ImVec2 p = ImGui::GetCursorScreenPos();
 
                     ImDrawList* draw_list = ImGui::GetWindowDrawList();
-                    draw_list->AddRectFilled(ImVec2(p.x, p.y), ImVec2(p.x + 2048, p.y + 800), ImColor(26, 26, 26, 256), 0, ImDrawFlags_RoundCornersAll);
+                    draw_list->AddRectFilled(ImVec2(p.x, p.y), ImVec2(p.x + 2048, p.y + 800), tabkgrndcolor, 0, ImDrawFlags_RoundCornersAll);
 
                     render(kb, p.x, p.y, io.MousePos.x, io.MousePos.y, io.FontGlobalScale);
 
