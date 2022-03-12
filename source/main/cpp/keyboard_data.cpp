@@ -1,11 +1,19 @@
 #include "xbase/x_base.h"
+#include "xbase/x_context.h"
 #include "xbase/x_memory.h"
 
 #include "xjson/x_json_decode.h"
 #include "xjson/x_json_allocator.h"
-#include "qmk-keymap-wiz/keyboard.h"
+
+#include "qmk-keymap-wiz/keyboard_data.h"
+
+#include "libimgui/imgui.h"
 
 #include <stdio.h>
+#include <ctime>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <stdlib.h>
 
 namespace xcore
 {
@@ -204,15 +212,50 @@ namespace xcore
     };
     // clang-format on
 
-    keyboards_t* load_keyboards(void* mem_buffer, u32 mem_buffer_len, void* scratch_buffer, u32 scratch_buffer_len, const char* filename)
+    void get_color(ImVec4 const& c, u8* color)
     {
+        color[0] = (xcore::u8)(c.x * 255.0f);
+        color[1] = (xcore::u8)(c.y * 255.0f);
+        color[2] = (xcore::u8)(c.z * 255.0f);
+        color[3] = (xcore::u8)(c.w * 255.0f);
+    }
+
+
+    static const char* kbdb_filename = "kbdb/kb.json";
+    static struct stat kbdb_file_state;
+
+    static xcore::u32 const main_allocator_size      = 1024 * 1024;
+    static xcore::u32 const scratch_allocator_size   = 1024 * 1024;
+    static void*            main1_allocator_memory   = nullptr;
+    static void*            main2_allocator_memory   = nullptr;
+    static void*            scratch_allocator_memory = nullptr;
+    static void*            main_allocator_memory    = nullptr;
+    static time_t           last_file_poll;
+    ;
+
+    void init_keyboards()
+    {
+        // Allocate memory for the main and scratch allocators
+        //
+        last_file_poll = time(nullptr);
+
+        main1_allocator_memory   = ::malloc(main_allocator_size);
+        main2_allocator_memory   = ::malloc(main_allocator_size);
+        scratch_allocator_memory = ::malloc(scratch_allocator_size);
+        main_allocator_memory    = main1_allocator_memory;
+    }
+
+    bool load_keyboards(keyboards_t const*& kbs)
+    {
+        stat(kbdb_filename, &kbdb_file_state);
+
         // load the file fully in memory
         // open the file
-        FILE* f = fopen(filename, "rb");
+        FILE* f = fopen(kbdb_filename, "rb");
         if (!f)
         {
-            printf("failed to open file %s\n", filename);
-            return nullptr;
+            printf("failed to open file %s\n", kbdb_filename);
+            return false;
         }
 
         // get the file size
@@ -221,10 +264,10 @@ namespace xcore
         fseek(f, 0, SEEK_SET);
 
         json::JsonAllocator alloc;
-        alloc.Init(mem_buffer, mem_buffer_len, "JSON allocator");
+        alloc.Init(main_allocator_memory, main_allocator_size, "JSON allocator");
 
         json::JsonAllocator scratch;
-        scratch.Init(scratch_buffer, scratch_buffer_len, "JSON scratch allocator");
+        scratch.Init(scratch_allocator_memory, scratch_allocator_size, "JSON scratch allocator");
 
         // allocate the buffer
         char* kbdb_json = scratch.AllocateArray<char>(kbdb_json_len + 1);
@@ -233,11 +276,13 @@ namespace xcore
             printf("failed to allocate %d bytes for the keyboard json\n", kbdb_json_len);
             alloc.Reset();
             scratch.Reset();
-            return nullptr;
+            fclose(f);
+            return false;
         }
 
         // read the file
         fread(kbdb_json, 1, kbdb_json_len, f);
+        fclose(f);
 
         keyboards_t* kb = alloc.Allocate<keyboards_t>();
         new (kb) keyboards_t();
@@ -250,7 +295,43 @@ namespace xcore
         bool        ok            = json::JsonDecode((const char*)kbdb_json, (const char*)kbdb_json + kbdb_json_len, json_root, &alloc, &scratch, error_message);
 
         scratch.Reset();
-        return kb;
+        kbs = kb;
+        return ok;
+    }
+
+    bool reload_keyboards(xcore::keyboards_t const*& kbs)
+    {
+        // only check every second on the clock if the file has changed
+        time_t now = time(nullptr);
+        if (now - last_file_poll > 1)
+        {
+            struct stat kbdb_file_state_updated;
+            if (stat(kbdb_filename, &kbdb_file_state_updated) == 0)
+            {
+                if (kbdb_file_state_updated.st_mtime > kbdb_file_state.st_mtime)
+                {
+                    if (main_allocator_memory == main1_allocator_memory)
+                    {
+                        main_allocator_memory = main2_allocator_memory;
+                    }
+                    else
+                    {
+                        main_allocator_memory = main1_allocator_memory;
+                    }
+
+                    kbdb_file_state = kbdb_file_state_updated;
+
+                    keyboards_t const* kbs_reloaded = nullptr;
+                    if (load_keyboards(kbs_reloaded))
+                    {
+                        kbs = kbs_reloaded;
+                        return true;
+                    }
+                }
+            }
+            last_file_poll = time(nullptr);
+        }
+        return false;
     }
 
 } // namespace xcore
