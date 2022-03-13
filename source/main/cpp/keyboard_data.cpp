@@ -17,7 +17,7 @@
 
 namespace xcore
 {
-    static key_t s_default_key;
+    static key_resource_t s_default_key;
 
     // clang-format off
     static json::JsonFieldDescr s_members_key[] = {
@@ -37,26 +37,26 @@ namespace xcore
     {
         ptr = nullptr;
         if (n == 1) {
-            ptr = alloc->Allocate<key_t>();
-            new (ptr) key_t();
+            ptr = alloc->Allocate<key_resource_t>();
+            new (ptr) key_resource_t();
         } else if (n > 1) {
-            ptr = alloc->AllocateArray<key_t>(n); 
+            ptr = alloc->AllocateArray<key_resource_t>(n); 
             
             char* mem = (char*)ptr;
             for (s32 i = 0; i < n; ++i)
             {
-                new (mem + i * sizeof(key_t)) key_t();
+                new (mem + i * sizeof(key_resource_t)) key_resource_t();
             }            
         }
     }
-    static void json_copy_key(void* dst, s32 dst_index, void* src ) { ((key_t*)dst)[dst_index] = *(key_t*)src; }
+    static void json_copy_key(void* dst, s32 dst_index, void* src ) { ((key_resource_t*)dst)[dst_index] = *(key_resource_t*)src; }
 
     static json::JsonTypeDescr json_key = 
     {
         "key",
         &s_default_key, 
-        sizeof(key_t),
-        ALIGNOF(key_t),
+        sizeof(key_resource_t),
+        ALIGNOF(key_resource_t),
         sizeof(s_members_key) / sizeof(json::JsonFieldDescr), 
         s_members_key
     };
@@ -67,7 +67,7 @@ namespace xcore
     };
     // clang-format on
 
-    static keygroup_t s_default_keygroup;
+    static keygroup_resource_t s_default_keygroup;
 
     // clang-format off
     static json::JsonFieldDescr s_members_keygroup[] = {
@@ -91,24 +91,24 @@ namespace xcore
     { 
         ptr = nullptr;
         if (n == 1) {
-            ptr = alloc->Allocate<keygroup_t>();
-            new (ptr) keygroup_t();
+            ptr = alloc->Allocate<keygroup_resource_t>();
+            new (ptr) keygroup_resource_t();
         } else if (n > 1) {
-            ptr = alloc->AllocateArray<keygroup_t>(n);             
+            ptr = alloc->AllocateArray<keygroup_resource_t>(n);             
             char* mem = (char*)ptr;
             for (s32 i = 0; i < n; ++i)
             {
-                new (mem + i * sizeof(keygroup_t)) keygroup_t();
+                new (mem + i * sizeof(keygroup_resource_t)) keygroup_resource_t();
             }            
         }
     }
-    static void json_copy_keygroup(void* dst, s32 dst_index, void* src) { ((keygroup_t*)dst)[dst_index] = *(keygroup_t*)src; }
+    static void json_copy_keygroup(void* dst, s32 dst_index, void* src) { ((keygroup_resource_t*)dst)[dst_index] = *(keygroup_resource_t*)src; }
 
     static json::JsonTypeDescr json_keygroup = {
         "keygroup",
         &s_default_keygroup, 
-        sizeof(keygroup_t),
-        ALIGNOF(keygroup_t),
+        sizeof(keygroup_resource_t),
+        ALIGNOF(keygroup_resource_t),
         sizeof(s_members_keygroup) / sizeof(json::JsonFieldDescr), 
         s_members_keygroup
     };
@@ -123,7 +123,7 @@ namespace xcore
     static const u8 sColorWhite[]    = {255, 255, 255, 255};
     static const u8 sColorBlue[]     = {0, 0, 255, 255};
 
-    keyboard_t::keyboard_t()
+    keyboard_resource_t::keyboard_resource_t()
     {
         m_name = "";
 
@@ -141,7 +141,7 @@ namespace xcore
         m_sh    = 0.0625f;
     }
 
-    static keyboard_t s_default_keyboard;
+    static keyboard_resource_t s_default_keyboard;
 
     // clang-format off
     static json::JsonFieldDescr s_members_keyboard[] = {
@@ -164,30 +164,30 @@ namespace xcore
         ptr = nullptr;
         if (n == 1)
         {
-            ptr = alloc->Allocate<keyboard_t>();
-            new (ptr) keyboard_t();
+            ptr = alloc->Allocate<keyboard_resource_t>();
+            new (ptr) keyboard_resource_t();
         }
         else if (n > 1)
         {
-            ptr = alloc->AllocateArray<keyboard_t>(n);
+            ptr = alloc->AllocateArray<keyboard_resource_t>(n);
 
             char* mem = (char*)ptr;
             for (s32 i = 0; i < n; ++i)
             {
-                new (mem + i * sizeof(keyboard_t)) keyboard_t();
+                new (mem + i * sizeof(keyboard_resource_t)) keyboard_resource_t();
             }
         }
     }
 
-    static void json_copy_keyboard(void* dst, s32 dst_index, void* src) { ((keyboard_t*)dst)[dst_index] = *(keyboard_t*)src; }
+    static void json_copy_keyboard(void* dst, s32 dst_index, void* src) { ((keyboard_resource_t*)dst)[dst_index] = *(keyboard_resource_t*)src; }
 
     // clang-format off
     static json::JsonTypeDescr json_keyboard = 
     {
         "keyboard",
         &s_default_keyboard, 
-        sizeof(keyboard_t),
-        ALIGNOF(keyboard_t),
+        sizeof(keyboard_resource_t),
+        ALIGNOF(keyboard_resource_t),
         sizeof(s_members_keyboard) / sizeof(json::JsonFieldDescr), 
         s_members_keyboard
     };
@@ -197,7 +197,7 @@ namespace xcore
         json_copy_keyboard,
     };
 
-    static keyboards_t s_default_keyboards;
+    static keyboards_resource_t s_default_keyboards;
 
     static json::JsonFieldDescr s_members_keyboard_root[] = {
         json::JsonFieldDescr("keyboards", s_default_keyboards.m_keyboards, s_default_keyboards.m_nb_keyboards, json_keyboard_funcs, json_keyboard), 
@@ -205,8 +205,8 @@ namespace xcore
     static json::JsonTypeDescr json_keyboards = {
         "keyboards", 
         &s_default_keyboards, 
-        sizeof(keyboards_t),
-        ALIGNOF(keyboards_t),
+        sizeof(keyboards_resource_t),
+        ALIGNOF(keyboards_resource_t),
         sizeof(s_members_keyboard_root) / sizeof(json::JsonFieldDescr), 
         s_members_keyboard_root
     };
@@ -245,7 +245,7 @@ namespace xcore
         main_allocator_memory    = main1_allocator_memory;
     }
 
-    bool load_keyboards(keyboards_t const*& kbs)
+    bool load_keyboards(keyboards_resource_t const*& kbs)
     {
         stat(kbdb_filename, &kbdb_file_state);
 
@@ -284,8 +284,8 @@ namespace xcore
         fread(kbdb_json, 1, kbdb_json_len, f);
         fclose(f);
 
-        keyboards_t* kb = alloc.Allocate<keyboards_t>();
-        new (kb) keyboards_t();
+        keyboards_resource_t* kb = alloc.Allocate<keyboards_resource_t>();
+        new (kb) keyboards_resource_t();
 
         json::JsonObject json_root;
         json_root.m_descr    = &json_keyboards;
@@ -299,7 +299,7 @@ namespace xcore
         return ok;
     }
 
-    bool reload_keyboards(xcore::keyboards_t const*& kbs)
+    bool reload_keyboards(xcore::keyboards_resource_t const*& kbs)
     {
         // only check every second on the clock if the file has changed
         time_t now = time(nullptr);
@@ -321,7 +321,7 @@ namespace xcore
 
                     kbdb_file_state = kbdb_file_state_updated;
 
-                    keyboards_t const* kbs_reloaded = nullptr;
+                    keyboards_resource_t const* kbs_reloaded = nullptr;
                     if (load_keyboards(kbs_reloaded))
                     {
                         kbs = kbs_reloaded;
@@ -333,6 +333,97 @@ namespace xcore
         }
         return false;
     }
+
+
+
+
+    // clang-format off
+    static keycode_t s_default_keycode;
+
+    static json::JsonFieldDescr s_members_keycode[] = {
+        json::JsonFieldDescr("code", s_default_keycode.m_code),
+        json::JsonFieldDescr("codes", s_default_keycode.m_codes, s_default_keycode.m_nb_codes),
+        json::JsonFieldDescr("normal", s_default_keycode.m_normal),
+        json::JsonFieldDescr("shifted", s_default_keycode.m_shifted),
+        json::JsonFieldDescr("icon", s_default_keycode.m_icon),
+        json::JsonFieldDescr("descr", s_default_keycode.m_descr)
+    };
+
+    static void json_alloc_keycode(json::JsonAllocator* alloc, s32 n, void*& ptr) 
+    {
+        ptr = nullptr;
+        if (n == 1) {
+            ptr = alloc->Allocate<keycode_t>();
+            new (ptr) keycode_t();
+        } else if (n > 1) {
+            ptr = alloc->AllocateArray<keycode_t>(n); 
+            
+            char* mem = (char*)ptr;
+            for (s32 i = 0; i < n; ++i)
+            {
+                new (mem + i * sizeof(keycode_t)) keycode_t();
+            }            
+        }
+    }
+    static void json_copy_key(void* dst, s32 dst_index, void* src ) { ((keycode_t*)dst)[dst_index] = *(keycode_t*)src; }
+
+    static json::JsonTypeDescr json_keycode = 
+    {
+        "keycode",
+        &s_default_keycode, 
+        sizeof(keycode_t),
+        ALIGNOF(keycode_t),
+        sizeof(s_members_keycode) / sizeof(json::JsonFieldDescr), 
+        s_members_keycode
+    };
+
+    static json::JsonTypeFuncs json_keycode_funcs = {
+        json_alloc_keycode,
+        json_copy_keycode,
+    };
+    // clang-format on
+
+
+    // clang-format off
+    static keycodes_t s_default_keycodes;
+
+    static json::JsonFieldDescr s_members_keycodes[] = {
+        json::JsonFieldDescr("keycodes", s_default_keycodes.m_keycodes, s_default_keycodes.m_nb_keycodes, json_keycode_funcs, json_keycode), 
+    };
+
+    static void json_alloc_keycodes(json::JsonAllocator* alloc, s32 n, void*& ptr) 
+    {
+        ptr = nullptr;
+        if (n == 1) {
+            ptr = alloc->Allocate<keycodes_t>();
+            new (ptr) keycodes_t();
+        } else if (n > 1) {
+            ptr = alloc->AllocateArray<keycodes_t>(n); 
+            
+            char* mem = (char*)ptr;
+            for (s32 i = 0; i < n; ++i)
+            {
+                new (mem + i * sizeof(keycodes_t)) keycodes_t();
+            }            
+        }
+    }
+    static void json_copy_key(void* dst, s32 dst_index, void* src ) { ((keycodes_t*)dst)[dst_index] = *(keycodes_t*)src; }
+
+    static json::JsonTypeDescr json_keycodes = 
+    {
+        "keycodes",
+        &s_default_keycodes, 
+        sizeof(keycodes_t),
+        ALIGNOF(keycodes_t),
+        sizeof(s_members_keycode) / sizeof(json::JsonFieldDescr), 
+        s_members_keycodes
+    };
+
+    static json::JsonTypeFuncs json_keycodes_funcs = {
+        json_alloc_keycodes,
+        json_copy_keycodes,
+    };
+    // clang-format on
 
 } // namespace xcore
 

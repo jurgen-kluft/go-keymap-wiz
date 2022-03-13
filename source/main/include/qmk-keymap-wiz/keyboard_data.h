@@ -163,12 +163,13 @@ namespace xcore
 
     struct key_t
     {
-        xcore::u16 m_keycode;
-        xcore::u16 m_mod;
-        xcore::u16 m_layer_mod;
-        xcore::u16 m_layer;
-        xcore::u8  m_capcolor[4];
-        xcore::u8  m_ledcolor[4];
+        const char* m_keycode_str;
+        xcore::u16  m_keycode_idx; // Index into keycodes_t array
+        xcore::u16  m_mod;
+        xcore::u16  m_layer_mod;
+        xcore::u16  m_layer;
+        xcore::u8   m_capcolor[4];
+        xcore::u8   m_ledcolor[4];
     };
 
     struct layer_t
@@ -198,14 +199,40 @@ namespace xcore
     // - array of keycode strings to icons
     struct keycode_t
     {
-        xcore::s32  m_id;   // 0
-        const char* m_icon; //
-        const char* m_code; // "KC_A"
-        const char* m_text; // "a"
+        keycode_t()
+        {
+            m_code     = nullptr;
+            m_nb_codes = 0;
+            m_codes    = nullptr;
+            m_normal   = nullptr;
+            m_shifted  = nullptr;
+            m_icon     = nullptr;
+            m_descr    = nullptr;
+        }
+
+        XCORE_CLASS_PLACEMENT_NEW_DELETE
+
+        const char*  m_code;     // "KC_ESC"
+        xcore::s32   m_nb_codes; // 2
+        const char** m_codes;    // ["KC_ESCAPE", "KC_ESC"]
+        const char*  m_normal;   // Normal keycode text
+        const char*  m_shifted;  // Shifted keycode text
+        const char*  m_icon;     // Unicode characters that represent an icon
+        const char*  m_descr;    // A description of the keycode
     };
 
     struct keycodes_t
     {
+        keycodes_t()
+        {
+            m_nb_keycodes = 0;
+            m_keycodes    = nullptr;
+        }
+
+        XCORE_CLASS_PLACEMENT_NEW_DELETE
+
+        xcore::s32 m_nb_keycodes;
+        keycode_t* m_keycodes;
     };
 
 } // namespace xcore
