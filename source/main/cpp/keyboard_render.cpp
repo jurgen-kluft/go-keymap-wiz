@@ -92,7 +92,7 @@ struct ImRotation
     int         m_start;
 };
 
-static bool IsPointInsideKey(xcore::keyboard_t const* kb, xcore::keygroup_t const& kg, xcore::key_t const& key, float globalscale, float x, float y, float px, float py)
+static bool IsPointInsideKey(xcore::keyboard_resource_t const* kb, xcore::keygroup_resource_t const& kg, xcore::key_resource_t const& key, float globalscale, float x, float y, float px, float py)
 {
     const float sw = key.m_sw * kg.m_sw * kb->m_sw * kb->m_scale * globalscale;
     const float sh = key.m_sh * kg.m_sh * kb->m_sh * kb->m_scale * globalscale;
@@ -185,7 +185,7 @@ void keyboard_loadfonts()
 
 }
 
-static void key_render(xcore::keyboard_t const* kb, xcore::keygroup_t const& kg, xcore::key_t const& key, float globalscale, float x, float y, float r, bool highlight)
+static void key_render(xcore::keyboard_resource_t const* kb, xcore::keygroup_resource_t const& kg, xcore::key_resource_t const& key, float globalscale, float x, float y, float r, bool highlight)
 {
     const float sw       = key.m_sw * kg.m_sw * kb->m_sw * kb->m_scale * globalscale;
     const float sh       = key.m_sh * kg.m_sh * kb->m_sh * kb->m_scale * globalscale;
@@ -290,7 +290,7 @@ static void key_render(xcore::keyboard_t const* kb, xcore::keygroup_t const& kg,
     rotation.Apply(r);
 }
 
-void keyboard_render(xcore::keyboard_t const* kb, float posx, float posy, float mousex, float mousey, float globalscale)
+void keyboard_render(xcore::keyboard_resource_t const* kb, float posx, float posy, float mousex, float mousey, float globalscale)
 {
     // origin = left/top corner
     float ox = posx + (kb->m_w / 2);
@@ -300,7 +300,7 @@ void keyboard_render(xcore::keyboard_t const* kb, float posx, float posy, float 
 
     for (int g = 0; g < kb->m_nb_keygroups; g++)
     {
-        xcore::keygroup_t const& kg = kb->m_keygroups[g];
+        xcore::keygroup_resource_t const& kg = kb->m_keygroups[g];
 
         float gx = ox + (kg.m_x * kb->m_scale * globalscale);
         float gy = oy + (kg.m_y * kb->m_scale * globalscale);
@@ -338,7 +338,7 @@ void keyboard_render(xcore::keyboard_t const* kb, float posx, float posy, float 
 
             for (int c = 0; c < kg.m_c && highlighted_key_index == -1; c++)
             {
-                xcore::key_t const& kc = kg.m_keys[k++];
+                xcore::key_resource_t const& kc = kg.m_keys[k++];
                 if (IsPointInsideKey(kb, kg, kc, globalscale, cx, cy, mx, my))
                 {
                     highlighted_key_index = kc.m_index;
@@ -360,7 +360,7 @@ void keyboard_render(xcore::keyboard_t const* kb, float posx, float posy, float 
 
             for (int c = 0; c < kg.m_c; c++)
             {
-                xcore::key_t const& kc = kg.m_keys[k++];
+                xcore::key_resource_t const& kc = kg.m_keys[k++];
                 key_render(kb, kg, kc, globalscale, cx, cy, rrad, kc.m_index == highlighted_key_index);
 
                 if (kc.m_index == highlighted_key_index)
