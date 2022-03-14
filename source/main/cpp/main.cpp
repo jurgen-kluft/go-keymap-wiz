@@ -117,10 +117,10 @@ int main(int, char**)
     // Our state
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
-    xcore::keyboards_resource_t const* keebs = nullptr;
+    xcore::ckeyboards_t const* keebs = nullptr;
     xcore::init_keyboards();
     xcore::load_keyboards(keebs);
-    xcore::keyboard_resource_t const* kb = &keebs->m_keyboards[0];
+    xcore::ckeyboard_t const* kb = &keebs->m_keyboards[0];
 
     // Main loop
     while (!glfwWindowShouldClose(window))

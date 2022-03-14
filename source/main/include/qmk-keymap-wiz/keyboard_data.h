@@ -11,9 +11,9 @@ struct ImVec4;
 
 namespace xcore
 {
-    struct key_resource_t
+    struct ckey_t
     {
-        key_resource_t()
+        ckey_t()
         {
             m_nob           = false;
             m_index         = -1;
@@ -47,9 +47,9 @@ namespace xcore
         u8*         m_ledcolor;      // color of the key led
     };
 
-    struct keygroup_resource_t
+    struct ckeygroup_t
     {
-        inline keygroup_resource_t()
+        inline ckeygroup_t()
         {
             m_name          = "";
             m_x             = 0.0f;
@@ -90,19 +90,19 @@ namespace xcore
         u8*             m_txtcolor; // color of the key label
         u8*             m_ledcolor; // color of the key led
         xcore::s16      m_nb_keys;  // number of keys in the array
-        key_resource_t* m_keys;     // array of keys
+        ckey_t* m_keys;     // array of keys
     };
 
-    struct keyboard_resource_t
+    struct ckeyboard_t
     {
-        keyboard_resource_t();
+        ckeyboard_t();
 
         XCORE_CLASS_PLACEMENT_NEW_DELETE
 
         const char* m_name; // name of this keyboard
 
         xcore::s16           m_nb_keygroups;
-        keygroup_resource_t* m_keygroups;
+        ckeygroup_t* m_keygroups;
 
         // global caps, txt and led color, can be overriden per key
         u8    m_capcolor[4];
@@ -115,9 +115,9 @@ namespace xcore
         float m_sh; // key spacing height
     };
 
-    struct keyboards_resource_t
+    struct ckeyboards_t
     {
-        keyboards_resource_t()
+        ckeyboards_t()
         {
             m_nb_keyboards = 0;
             m_keyboards    = nullptr;
@@ -126,15 +126,17 @@ namespace xcore
         XCORE_CLASS_PLACEMENT_NEW_DELETE
 
         xcore::s32           m_nb_keyboards;
-        keyboard_resource_t* m_keyboards;
+        ckeyboard_t* m_keyboards;
     };
 
     void get_color(ImVec4 const& c, u8* color);
 
     void init_keyboards();
-    bool load_keyboards(keyboards_resource_t const*& kbs);
-    bool reload_keyboards(keyboards_resource_t const*& kbs);
+    bool load_keyboards(ckeyboards_t const*& kbs);
+    bool reload_keyboards(ckeyboards_t const*& kbs);
 
+    // -----------------------------------------------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------------------------------------------
     // When the user has loaded the keyboard definitions and has selected a keyboard we should also load the mutable data.
     // That data consists of a very simple list of layers.
     enum elayer_mod
@@ -163,6 +165,10 @@ namespace xcore
 
     struct key_t
     {
+        key_t();
+
+        XCORE_CLASS_PLACEMENT_NEW_DELETE
+
         const char* m_keycode_str;
         xcore::u16  m_keycode_idx; // Index into keycodes_t array
         xcore::u16  m_mod;
@@ -174,6 +180,15 @@ namespace xcore
 
     struct layer_t
     {
+        layer_t() {
+            m_name = "";
+            m_index = -1;
+            m_nb_keys = 0;
+            m_keys = nullptr;
+        }
+
+        XCORE_CLASS_PLACEMENT_NEW_DELETE
+
         const char* m_name;
         xcore::s16  m_index;
         xcore::s16  m_nb_keys;
@@ -194,6 +209,8 @@ namespace xcore
         layer_t*   m_layers;
     };
 
+    // -----------------------------------------------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------------------------------------------
     // Also we have 2 databases used for rendering the keyboards:
     // - array of keycode strings to text
     // - array of keycode strings to icons
@@ -234,6 +251,9 @@ namespace xcore
         xcore::s32 m_nb_keycodes;
         keycode_t* m_keycodes;
     };
+
+    void init_keycodes();
+    bool load_keycodes(keycodes_t const*& _kcds);
 
 } // namespace xcore
 

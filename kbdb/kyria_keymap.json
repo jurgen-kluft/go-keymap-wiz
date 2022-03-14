@@ -1,0 +1,14 @@
+{
+    "layers": [
+        {
+            "name": "",
+            "index": 0,
+            "keys": [
+                {
+                    "keycode": "KC_ESC",
+                    "keycode": "KC_Q"
+                }
+            ]
+        }
+    ]
+}
