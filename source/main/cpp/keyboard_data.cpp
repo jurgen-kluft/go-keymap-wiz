@@ -355,9 +355,9 @@ namespace xcore
     key_t::key_t()
     {
         m_keycode_str = "KC_NO";
-        m_keycode_idx = 0;
         m_mod         = 0;
-        m_layer_mod   = 0;
+        m_mod_tap     = 0;
+        m_layer_switch= 0;
         m_layer       = 0;
         copy(m_capcolor, sColorDarkGrey);
         copy(m_ledcolor, sColorBlue);
@@ -369,6 +369,11 @@ namespace xcore
     static json::JsonFieldDescr s_members_key[] = {
         json::JsonFieldDescr("keycode", s_default_key.m_keycode_str),
         json::JsonFieldDescr("mod", s_default_key.m_mod),
+        json::JsonFieldDescr("mod_tap", s_default_key.m_mod_tap),
+        json::JsonFieldDescr("layer_switch", s_default_key.m_layer_switch),
+        json::JsonFieldDescr("layer", s_default_key.m_layer),
+        json::JsonFieldDescr("cap_color", s_default_key.m_capcolor, 4),
+        json::JsonFieldDescr("led_color", s_default_key.m_ledcolor, 4),
     };
 
     static void json_alloc_key(json::JsonAllocator* alloc, s32 n, void*& ptr) 
@@ -406,6 +411,16 @@ namespace xcore
     // clang-format on
 
     // clang-format off
+    layer_t::layer_t()
+    {
+        m_name = "";
+        m_index = -1;
+        m_nb_keys = 0;
+        m_keys = nullptr;
+        copy(m_capcolor, sColorDarkGrey);
+        copy(m_ledcolor, sColorBlue);
+    }
+
     static layer_t s_default_layer;
 
     static json::JsonFieldDescr s_members_layer[] = {
@@ -449,6 +464,46 @@ namespace xcore
     // clang-format on
 
 
+    // clang-format off
+    static keymap_t s_default_keymap;
+
+    static json::JsonFieldDescr s_members_keymap[] = {
+        json::JsonFieldDescr("layers", s_default_keymap.m_layers, s_default_keymap.m_nb_layers, json_layer_funcs, json_layer),
+    };
+
+    static void json_alloc_keymap(json::JsonAllocator* alloc, s32 n, void*& ptr) 
+    {
+        ptr = nullptr;
+        if (n == 1) {
+            ptr = alloc->Allocate<keymap_t>();
+            new (ptr) keymap_t();
+        } else if (n > 1) {
+            ptr = alloc->AllocateArray<keymap_t>(n); 
+            
+            char* mem = (char*)ptr;
+            for (s32 i = 0; i < n; ++i)
+            {
+                new (mem + i * sizeof(keymap_t)) keymap_t();
+            }            
+        }
+    }
+    static void json_copy_keymap(void* dst, s32 dst_index, void* src ) { ((keymap_t*)dst)[dst_index] = *(keymap_t*)src; }
+
+    static json::JsonTypeDescr json_keymap = 
+    {
+        "keymap",
+        &s_default_keymap, 
+        sizeof(keymap_t),
+        ALIGNOF(keymap_t),
+        sizeof(s_members_keymap) / sizeof(json::JsonFieldDescr), 
+        s_members_keymap
+    };
+
+    static json::JsonTypeFuncs json_keymap_funcs = {
+        json_alloc_keymap,
+        json_copy_keymap,
+    };
+    // clang-format on
 
 
 

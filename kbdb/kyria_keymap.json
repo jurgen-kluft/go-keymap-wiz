@@ -1,12 +1,71 @@
 {
-    "layers": [
+    "keymaps": [
         {
-            "name": "",
-            "index": 0,
-            "keys": [
+            "name": "Kyria 3x6",
+            "layers": [
                 {
-                    "keycode": "KC_ESC",
-                    "keycode": "KC_Q"
+                    "name": "QWERTY",
+                    "index": 0,
+                    "cap_color": [25,25,25,255],
+                    "led_color": [25,25,255,255],
+                    "keys": [
+                        { "keycode": "KC_NO" },
+                        { "keycode": "KC_Q" },
+                        { "keycode": "KC_W" },
+                        { "keycode": "KC_E" },
+                        { "keycode": "KC_R" },
+                        { "keycode": "KC_T" },
+                        { "keycode": "KC_Y" },
+                        { "keycode": "KC_U" },
+                        { "keycode": "KC_I" },
+                        { "keycode": "KC_O" },
+                        { "keycode": "KC_P" },
+                        { "keycode": "KC_NO" },
+
+                        { "keycode": "KC_NO" },
+                        { "keycode": "KC_A" },
+                        { "keycode": "KC_S" },
+                        { "keycode": "KC_D" },
+                        { "keycode": "KC_F" },
+                        { "keycode": "KC_G" },
+                        { "keycode": "KC_H" },
+                        { "keycode": "KC_J" },
+                        { "keycode": "KC_K" },
+                        { "keycode": "KC_L" },
+                        { "keycode": "KC_SCLN" },
+                        { "keycode": "KC_NO" },
+
+                        { "keycode": "KC_NO"},
+                        { "keycode": "KC_Z" },
+                        { "keycode": "KC_X" },
+                        { "keycode": "KC_C" },
+                        { "keycode": "KC_V" },
+                        { "keycode": "KC_B" },
+
+                        { "keycode": "KC_NO" },
+                        { "keycode": "KC_NO" },
+                        { "keycode": "KC_NO" },
+                        { "keycode": "KC_NO" },
+
+                        { "keycode": "KC_N" },
+                        { "keycode": "KC_M" },
+                        { "keycode": "KC_COMM" },
+                        { "keycode": "KC_DOT" },
+                        { "keycode": "KC_SLSH" },
+                        { "keycode": "KC_NO"},
+
+                        { "keycode": "TG", "layer": "MOUSE" },
+                        { "keycode": "KC_FNUM" },
+                        { "keycode": "KC_FNAV" },
+                        { "keycode": "KC_NO" },
+                        { "keycode": "KC_SPACE" },
+
+                        { "keycode": "KC_NO" },
+                        { "keycode": "KC_BACKSPACE" },
+                        { "keycode": "KC_FSYM" },
+                        { "keycode": "KC_FCAPS" },
+                        { "keycode": "TG", "layer": "MOUSE" }
+                    ]
                 }
             ]
         }

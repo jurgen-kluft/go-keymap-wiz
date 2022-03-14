@@ -139,7 +139,7 @@ namespace xcore
     // -----------------------------------------------------------------------------------------------------------------
     // When the user has loaded the keyboard definitions and has selected a keyboard we should also load the mutable data.
     // That data consists of a very simple list of layers.
-    enum elayer_mod
+    enum elayer_switch
     {
         MO  = 0x01, // While held, MOmentarily switch to YOUR_LAYER.
         LT  = 0x02, // Layer Tap. When held: go to YOUR_LAYER. When tapped: send KC_XXXX
@@ -159,8 +159,12 @@ namespace xcore
         RALT = 0x20, // applies right Alt to KC_XXXX
         LGUI = 0x40, // applies left GUI (command/win) to KC_XXXX
         RGUI = 0x80, // applies right GUI (command/win) to KC_XXXX
-        MT   = 0x100,
-        OSM  = 0x200,
+    };
+
+    enum emod_tap 
+    {
+        MT   = 0x100,// 'mod' when held, 'keycode' when tapped 
+        OSM  = 0x200, // one-shot modifier
     };
 
     struct key_t
@@ -170,22 +174,17 @@ namespace xcore
         XCORE_CLASS_PLACEMENT_NEW_DELETE
 
         const char* m_keycode_str;
-        xcore::u16  m_keycode_idx; // Index into keycodes_t array
         xcore::u16  m_mod;
-        xcore::u16  m_layer_mod;
-        xcore::u16  m_layer;
+        xcore::u16  m_mod_tap;
+        xcore::u16  m_layer_switch;
+        const char* m_layer;
         xcore::u8   m_capcolor[4];
         xcore::u8   m_ledcolor[4];
     };
 
     struct layer_t
     {
-        layer_t() {
-            m_name = "";
-            m_index = -1;
-            m_nb_keys = 0;
-            m_keys = nullptr;
-        }
+        layer_t();
 
         XCORE_CLASS_PLACEMENT_NEW_DELETE
 
@@ -193,6 +192,8 @@ namespace xcore
         xcore::s16  m_index;
         xcore::s16  m_nb_keys;
         key_t*      m_keys;
+        xcore::u8   m_capcolor[4];
+        xcore::u8   m_ledcolor[4];
     };
 
     struct keymap_t
