@@ -121,7 +121,7 @@ namespace xcore
     struct skeyboards_t
     {
         skeyboards_t()
-            : kbdb_filename("kbdb/kb.json")
+            : kbdb_filename("kbdb/keyboards.json")
             , main_allocator_size(1024 * 1024)
             , scratch_allocator_size(1024 * 1024)
         {
