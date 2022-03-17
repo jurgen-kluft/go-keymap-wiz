@@ -17,107 +17,47 @@
 
 namespace xcore
 {
-    static ckey_t s_default_ckey;
-
-    // clang-format off
-    static json::JsonFieldDescr s_members_ckey[] = {
-        json::JsonFieldDescr("nob", s_default_ckey.m_nob), 
-        json::JsonFieldDescr("index", s_default_ckey.m_index), 
-        json::JsonFieldDescr("label", s_default_ckey.m_label), 
-        json::JsonFieldDescr("w", s_default_ckey.m_w), 
-        json::JsonFieldDescr("h", s_default_ckey.m_h),
-        json::JsonFieldDescr("sw", s_default_ckey.m_sw), 
-        json::JsonFieldDescr("sh", s_default_ckey.m_sh),
-        json::JsonFieldDescr("cap_color", s_default_ckey.m_capcolor, s_default_ckey.m_capcolor_size),
-        json::JsonFieldDescr("txt_color", s_default_ckey.m_txtcolor, s_default_ckey.m_txtcolor_size),
-        json::JsonFieldDescr("led_color", s_default_ckey.m_ledcolor, s_default_ckey.m_ledcolor_size),
-    };
-
-    static void json_alloc_ckey(json::JsonAllocator* alloc, s32 n, void*& ptr) 
+    template <> void json::JsonObjectTypeRegisterFields<ckey_t>(ckey_t& base, json::JsonFieldDescr*& members, s32& member_count)
     {
-        ptr = nullptr;
-        if (n == 1) {
-            ptr = alloc->Allocate<ckey_t>();
-            new (ptr) ckey_t();
-        } else if (n > 1) {
-            ptr = alloc->AllocateArray<ckey_t>(n); 
-            
-            char* mem = (char*)ptr;
-            for (s32 i = 0; i < n; ++i)
-            {
-                new (mem + i * sizeof(ckey_t)) ckey_t();
-            }            
-        }
+        static json::JsonFieldDescr s_members[] = {
+            json::JsonFieldDescr("nob", base.m_nob),
+            json::JsonFieldDescr("index", base.m_index),
+            json::JsonFieldDescr("label", base.m_label),
+            json::JsonFieldDescr("w", base.m_w),
+            json::JsonFieldDescr("h", base.m_h),
+            json::JsonFieldDescr("sw", base.m_sw),
+            json::JsonFieldDescr("sh", base.m_sh),
+            json::JsonFieldDescr("cap_color", base.m_capcolor, base.m_capcolor_size),
+            json::JsonFieldDescr("txt_color", base.m_txtcolor, base.m_txtcolor_size),
+            json::JsonFieldDescr("led_color", base.m_ledcolor, base.m_ledcolor_size),
+        };
+        members      = s_members;
+        member_count = sizeof(s_members) / sizeof(json::JsonFieldDescr);
     }
-    static void json_copy_ckey(void* dst, s32 dst_index, void* src ) { ((ckey_t*)dst)[dst_index] = *(ckey_t*)src; }
+    static json::JsonObjectTypeDeclr<ckey_t> json_ckey("ckey");
 
-    static json::JsonTypeDescr json_ckey = 
+    template <> void json::JsonObjectTypeRegisterFields<ckeygroup_t>(ckeygroup_t& base, json::JsonFieldDescr*& members, s32& member_count)
     {
-        "key",
-        &s_default_ckey, 
-        sizeof(ckey_t),
-        ALIGNOF(ckey_t),
-        sizeof(s_members_ckey) / sizeof(json::JsonFieldDescr), 
-        s_members_ckey
-    };
-
-    static json::JsonTypeFuncs json_ckeys_funcs = {
-        json_alloc_ckey,
-        json_copy_ckey,
-    };
-    // clang-format on
-
-    static ckeygroup_t s_default_ckeygroup;
-
-    // clang-format off
-    static json::JsonFieldDescr s_members_ckeygroup[] = {
-        json::JsonFieldDescr("name", s_default_ckeygroup.m_name), 
-        json::JsonFieldDescr("x", s_default_ckeygroup.m_x), 
-        json::JsonFieldDescr("y", s_default_ckeygroup.m_y),
-        json::JsonFieldDescr("w", s_default_ckeygroup.m_w), 
-        json::JsonFieldDescr("h", s_default_ckeygroup.m_h), 
-        json::JsonFieldDescr("sw", s_default_ckeygroup.m_sw), 
-        json::JsonFieldDescr("sh", s_default_ckeygroup.m_sh), 
-        json::JsonFieldDescr("r", s_default_ckeygroup.m_r),
-        json::JsonFieldDescr("c", s_default_ckeygroup.m_c),
-        json::JsonFieldDescr("a", s_default_ckeygroup.m_a),
-        json::JsonFieldDescr("cap_color", s_default_ckeygroup.m_capcolor, s_default_ckeygroup.m_capcolor_size), 
-        json::JsonFieldDescr("txt_color", s_default_ckeygroup.m_txtcolor, s_default_ckeygroup.m_txtcolor_size), 
-        json::JsonFieldDescr("led_color", s_default_ckeygroup.m_ledcolor, s_default_ckeygroup.m_ledcolor_size), 
-        json::JsonFieldDescr("keys", s_default_ckeygroup.m_keys, s_default_ckeygroup.m_nb_keys, json_ckeys_funcs, json_ckey), 
-    };
-
-    static void json_alloc_ckeygroup(json::JsonAllocator* alloc, s32 n, void*& ptr) 
-    { 
-        ptr = nullptr;
-        if (n == 1) {
-            ptr = alloc->Allocate<ckeygroup_t>();
-            new (ptr) ckeygroup_t();
-        } else if (n > 1) {
-            ptr = alloc->AllocateArray<ckeygroup_t>(n);             
-            char* mem = (char*)ptr;
-            for (s32 i = 0; i < n; ++i)
-            {
-                new (mem + i * sizeof(ckeygroup_t)) ckeygroup_t();
-            }            
-        }
+        static json::JsonFieldDescr s_members[] = {
+            json::JsonFieldDescr("name", base.m_name),
+            json::JsonFieldDescr("x", base.m_x),
+            json::JsonFieldDescr("y", base.m_y),
+            json::JsonFieldDescr("w", base.m_w),
+            json::JsonFieldDescr("h", base.m_h),
+            json::JsonFieldDescr("sw", base.m_sw),
+            json::JsonFieldDescr("sh", base.m_sh),
+            json::JsonFieldDescr("r", base.m_r),
+            json::JsonFieldDescr("c", base.m_c),
+            json::JsonFieldDescr("a", base.m_a),
+            json::JsonFieldDescr("cap_color", base.m_capcolor, base.m_capcolor_size),
+            json::JsonFieldDescr("txt_color", base.m_txtcolor, base.m_txtcolor_size),
+            json::JsonFieldDescr("led_color", base.m_ledcolor, base.m_ledcolor_size),
+            json::JsonFieldDescr("keys", base.m_keys, base.m_nb_keys, json_ckey),
+        };
+        members      = s_members;
+        member_count = sizeof(s_members) / sizeof(json::JsonFieldDescr);
     }
-    static void json_copy_ckeygroup(void* dst, s32 dst_index, void* src) { ((ckeygroup_t*)dst)[dst_index] = *(ckeygroup_t*)src; }
-
-    static json::JsonTypeDescr json_ckeygroup = {
-        "keygroup",
-        &s_default_ckeygroup, 
-        sizeof(ckeygroup_t),
-        ALIGNOF(ckeygroup_t),
-        sizeof(s_members_ckeygroup) / sizeof(json::JsonFieldDescr), 
-        s_members_ckeygroup
-    };
-
-    static json::JsonTypeFuncs json_ckeygroup_funcs = {
-        json_alloc_ckeygroup,
-        json_copy_ckeygroup,
-    };
-    // clang-format on
+    static json::JsonObjectTypeDeclr<ckeygroup_t> json_ckeygroup("ckeygroup");
 
     static const u8 sColorDarkGrey[] = {25, 25, 25, 255};
     static const u8 sColorWhite[]    = {255, 255, 255, 255};
@@ -141,76 +81,34 @@ namespace xcore
         m_sh    = 0.0625f;
     }
 
-    static ckeyboard_t s_default_ckeyboard;
-
-    // clang-format off
-    static json::JsonFieldDescr s_members_ckeyboard[] = {
-        json::JsonFieldDescr("name", s_default_ckeyboard.m_name),
-        json::JsonFieldDescr("scale", s_default_ckeyboard.m_scale), 
-        json::JsonFieldDescr("key_width", s_default_ckeyboard.m_w), 
-        json::JsonFieldDescr("key_height", s_default_ckeyboard.m_h), 
-        json::JsonFieldDescr("key_spacing_x", s_default_ckeyboard.m_sw), 
-        json::JsonFieldDescr("key_spacing_y", s_default_ckeyboard.m_sh), 
-        json::JsonFieldDescr("cap_color", s_default_ckeyboard.m_capcolor, 4), 
-        json::JsonFieldDescr("txt_color", s_default_ckeyboard.m_txtcolor, 4), 
-        json::JsonFieldDescr("led_color", s_default_ckeyboard.m_ledcolor, 4), 
-        json::JsonFieldDescr("keygroups", s_default_ckeyboard.m_keygroups, s_default_ckeyboard.m_nb_keygroups, json_ckeygroup_funcs, json_ckeygroup), 
-    };
-    // clang-format on
-
-    // implementation of the constructor for the keygroup object
-    static void json_construct_ckeyboard(json::JsonAllocator* alloc, s32 n, void*& ptr)
+    template <> void json::JsonObjectTypeRegisterFields<ckeyboard_t>(ckeyboard_t& base, json::JsonFieldDescr*& members, s32& member_count)
     {
-        ptr = nullptr;
-        if (n == 1)
-        {
-            ptr = alloc->Allocate<ckeyboard_t>();
-            new (ptr) ckeyboard_t();
-        }
-        else if (n > 1)
-        {
-            ptr = alloc->AllocateArray<ckeyboard_t>(n);
-
-            char* mem = (char*)ptr;
-            for (s32 i = 0; i < n; ++i)
-            {
-                new (mem + i * sizeof(ckeyboard_t)) ckeyboard_t();
-            }
-        }
+        static json::JsonFieldDescr s_members[] = {
+            json::JsonFieldDescr("name", base.m_name),
+            json::JsonFieldDescr("scale", base.m_scale),
+            json::JsonFieldDescr("key_width", base.m_w),
+            json::JsonFieldDescr("key_height", base.m_h),
+            json::JsonFieldDescr("key_spacing_x", base.m_sw),
+            json::JsonFieldDescr("key_spacing_y", base.m_sh),
+            json::JsonFieldDescr("cap_color", base.m_capcolor, 4),
+            json::JsonFieldDescr("txt_color", base.m_txtcolor, 4),
+            json::JsonFieldDescr("led_color", base.m_ledcolor, 4),
+            json::JsonFieldDescr("keygroups", base.m_keygroups, base.m_nb_keygroups, json_ckeygroup),
+        };
+        members      = s_members;
+        member_count = sizeof(s_members) / sizeof(json::JsonFieldDescr);
     }
+    static json::JsonObjectTypeDeclr<ckeyboard_t> json_ckeyboard("ckeyboard");
 
-    static void json_copy_ckeyboard(void* dst, s32 dst_index, void* src) { ((ckeyboard_t*)dst)[dst_index] = *(ckeyboard_t*)src; }
-
-    // clang-format off
-    static json::JsonTypeDescr json_ckeyboard = 
+    template <> void json::JsonObjectTypeRegisterFields<ckeyboards_t>(ckeyboards_t& base, json::JsonFieldDescr*& members, s32& member_count)
     {
-        "keyboard",
-        &s_default_ckeyboard, 
-        sizeof(ckeyboard_t),
-        ALIGNOF(ckeyboard_t),
-        sizeof(s_members_ckeyboard) / sizeof(json::JsonFieldDescr), 
-        s_members_ckeyboard
-    };
-
-    static json::JsonTypeFuncs json_ckeyboard_funcs = {
-        json_construct_ckeyboard,
-        json_copy_ckeyboard,
-    };
-
-    static ckeyboards_t s_default_ckeyboards;
-
-    static json::JsonFieldDescr s_members_keyboard_root[] = {
-        json::JsonFieldDescr("keyboards", s_default_ckeyboards.m_keyboards, s_default_ckeyboards.m_nb_keyboards, json_ckeyboard_funcs, json_ckeyboard), 
-    };
-    static json::JsonTypeDescr json_ckeyboards = {
-        "keyboards", 
-        &s_default_ckeyboards, 
-        sizeof(ckeyboards_t),
-        ALIGNOF(ckeyboards_t),
-        sizeof(s_members_keyboard_root) / sizeof(json::JsonFieldDescr), 
-        s_members_keyboard_root
-    };
-    // clang-format on
+        static json::JsonFieldDescr s_members[] = {
+            json::JsonFieldDescr("keyboards", base.m_keyboards, base.m_nb_keyboards, json_ckeyboard),
+        };
+        members      = s_members;
+        member_count = sizeof(s_members) / sizeof(json::JsonFieldDescr);
+    }
+    static json::JsonObjectTypeDeclr<ckeyboards_t> json_ckeyboards("ckeyboards");
 
     void get_color(ImVec4 const& c, u8* color)
     {
@@ -258,6 +156,25 @@ namespace xcore
         s_kbds.main2_allocator_memory   = ::malloc(s_kbds.main_allocator_size);
         s_kbds.scratch_allocator_memory = ::malloc(s_kbds.scratch_allocator_size);
         s_kbds.main_allocator_memory    = s_kbds.main1_allocator_memory;
+    }
+
+    void exit_keyboards()
+    {
+        if (s_kbds.main1_allocator_memory)
+        {
+            ::free(s_kbds.main1_allocator_memory);
+            s_kbds.main1_allocator_memory = nullptr;
+        }
+        if (s_kbds.main2_allocator_memory)
+        {
+            ::free(s_kbds.main2_allocator_memory);
+            s_kbds.main2_allocator_memory = nullptr;
+        }
+        if (s_kbds.scratch_allocator_memory)
+        {
+            ::free(s_kbds.scratch_allocator_memory);
+            s_kbds.scratch_allocator_memory = nullptr;
+        }
     }
 
     bool load_keyboards(ckeyboards_t const*& kbs)
@@ -352,261 +269,118 @@ namespace xcore
     // --------------------------------------------------------------------------------------------------------------------------
     // --------------------------------------------------------------------------------------------------------------------------
 
+    /*
+    - Normal
+    - Mod Tap
+    - Layer Tap
+    -
+
+    */
+
     key_t::key_t()
     {
-        m_keycode_str = "KC_NO";
-        m_mod         = 0;
-        m_mod_tap     = 0;
-        m_layer_switch= 0;
-        m_layer       = 0;
+        m_keycode_str  = "KC_NO";
+        m_mod          = 0;
+        m_mod_tap      = 0;
+        m_layer_switch = 0;
+        m_layer        = 0;
         copy(m_capcolor, sColorDarkGrey);
         copy(m_ledcolor, sColorBlue);
     }
 
-    // clang-format off
-    static key_t s_default_key;
-
-    static json::JsonFieldDescr s_members_key[] = {
-        json::JsonFieldDescr("keycode", s_default_key.m_keycode_str),
-        json::JsonFieldDescr("mod", s_default_key.m_mod),
-        json::JsonFieldDescr("mod_tap", s_default_key.m_mod_tap),
-        json::JsonFieldDescr("layer_switch", s_default_key.m_layer_switch),
-        json::JsonFieldDescr("layer", s_default_key.m_layer),
-        json::JsonFieldDescr("cap_color", s_default_key.m_capcolor, 4),
-        json::JsonFieldDescr("led_color", s_default_key.m_ledcolor, 4),
-    };
-
-    static void json_alloc_key(json::JsonAllocator* alloc, s32 n, void*& ptr) 
+    template <> void json::JsonObjectTypeRegisterFields<key_t>(key_t& base, json::JsonFieldDescr*& members, s32& member_count)
     {
-        ptr = nullptr;
-        if (n == 1) {
-            ptr = alloc->Allocate<key_t>();
-            new (ptr) key_t();
-        } else if (n > 1) {
-            ptr = alloc->AllocateArray<key_t>(n); 
-            
-            char* mem = (char*)ptr;
-            for (s32 i = 0; i < n; ++i)
-            {
-                new (mem + i * sizeof(key_t)) key_t();
-            }            
-        }
+        // clang-format off
+        static json::JsonFieldDescr s_members[] = 
+        {
+            json::JsonFieldDescr("keycode", base.m_keycode_str),       
+            json::JsonFieldDescr("mod", base.m_mod),     
+            json::JsonFieldDescr("mod_tap", base.m_mod_tap),
+            json::JsonFieldDescr("layer_switch", base.m_layer_switch), 
+            json::JsonFieldDescr("layer", base.m_layer), 
+            json::JsonFieldDescr("cap_color", base.m_capcolor, 4),
+            json::JsonFieldDescr("led_color", base.m_ledcolor, 4),
+        };
+        // clang-format on
+        members      = s_members;
+        member_count = sizeof(s_members) / sizeof(json::JsonFieldDescr);
     }
-    static void json_copy_key(void* dst, s32 dst_index, void* src ) { ((key_t*)dst)[dst_index] = *(key_t*)src; }
+    static json::JsonObjectTypeDeclr<key_t> json_key("key");
 
-    static json::JsonTypeDescr json_key = 
-    {
-        "key",
-        &s_default_key, 
-        sizeof(key_t),
-        ALIGNOF(key_t),
-        sizeof(s_members_key) / sizeof(json::JsonFieldDescr), 
-        s_members_key
-    };
-
-    static json::JsonTypeFuncs json_key_funcs = {
-        json_alloc_key,
-        json_copy_key,
-    };
-    // clang-format on
-
-    // clang-format off
     layer_t::layer_t()
     {
-        m_name = "";
-        m_index = -1;
+        m_name    = "";
+        m_index   = -1;
         m_nb_keys = 0;
-        m_keys = nullptr;
+        m_keys    = nullptr;
         copy(m_capcolor, sColorDarkGrey);
         copy(m_ledcolor, sColorBlue);
     }
 
-    static layer_t s_default_layer;
-
-    static json::JsonFieldDescr s_members_layer[] = {
-        json::JsonFieldDescr("name", s_default_layer.m_name),
-        json::JsonFieldDescr("index", s_default_layer.m_index),
-        json::JsonFieldDescr("keys", s_default_layer.m_keys, s_default_layer.m_nb_keys, json_key_funcs, json_key),
-    };
-
-    static void json_alloc_layer(json::JsonAllocator* alloc, s32 n, void*& ptr) 
+    template <> void json::JsonObjectTypeRegisterFields<layer_t>(layer_t& base, json::JsonFieldDescr*& members, s32& member_count)
     {
-        ptr = nullptr;
-        if (n == 1) {
-            ptr = alloc->Allocate<layer_t>();
-            new (ptr) layer_t();
-        } else if (n > 1) {
-            ptr = alloc->AllocateArray<layer_t>(n); 
-            
-            char* mem = (char*)ptr;
-            for (s32 i = 0; i < n; ++i)
-            {
-                new (mem + i * sizeof(layer_t)) layer_t();
-            }            
-        }
+        // clang-format off
+        static json::JsonFieldDescr s_members[] = {
+            json::JsonFieldDescr("name", base.m_name),
+            json::JsonFieldDescr("index", base.m_index),
+            json::JsonFieldDescr("keys", base.m_keys, base.m_nb_keys, json_key),
+        };
+        // clang-format on
+        members      = s_members;
+        member_count = sizeof(s_members) / sizeof(json::JsonFieldDescr);
     }
-    static void json_copy_layer(void* dst, s32 dst_index, void* src ) { ((layer_t*)dst)[dst_index] = *(layer_t*)src; }
+    static json::JsonObjectTypeDeclr<layer_t> json_layer("layer");
 
-    static json::JsonTypeDescr json_layer = 
+    template <> void json::JsonObjectTypeRegisterFields<keymap_t>(keymap_t& base, json::JsonFieldDescr*& members, s32& member_count)
     {
-        "key",
-        &s_default_layer, 
-        sizeof(layer_t),
-        ALIGNOF(layer_t),
-        sizeof(s_members_layer) / sizeof(json::JsonFieldDescr), 
-        s_members_layer
-    };
-
-    static json::JsonTypeFuncs json_layer_funcs = {
-        json_alloc_layer,
-        json_copy_layer,
-    };
-    // clang-format on
-
-
-    // clang-format off
-    static keymap_t s_default_keymap;
-
-    static json::JsonFieldDescr s_members_keymap[] = {
-        json::JsonFieldDescr("layers", s_default_keymap.m_layers, s_default_keymap.m_nb_layers, json_layer_funcs, json_layer),
-    };
-
-    static void json_alloc_keymap(json::JsonAllocator* alloc, s32 n, void*& ptr) 
-    {
-        ptr = nullptr;
-        if (n == 1) {
-            ptr = alloc->Allocate<keymap_t>();
-            new (ptr) keymap_t();
-        } else if (n > 1) {
-            ptr = alloc->AllocateArray<keymap_t>(n); 
-            
-            char* mem = (char*)ptr;
-            for (s32 i = 0; i < n; ++i)
-            {
-                new (mem + i * sizeof(keymap_t)) keymap_t();
-            }            
-        }
+        // clang-format off
+        static json::JsonFieldDescr s_members[] = {
+            json::JsonFieldDescr("layers", base.m_layers, base.m_nb_layers, json_layer),
+        };
+        // clang-format on
+        members      = s_members;
+        member_count = sizeof(s_members) / sizeof(json::JsonFieldDescr);
     }
-    static void json_copy_keymap(void* dst, s32 dst_index, void* src ) { ((keymap_t*)dst)[dst_index] = *(keymap_t*)src; }
-
-    static json::JsonTypeDescr json_keymap = 
-    {
-        "keymap",
-        &s_default_keymap, 
-        sizeof(keymap_t),
-        ALIGNOF(keymap_t),
-        sizeof(s_members_keymap) / sizeof(json::JsonFieldDescr), 
-        s_members_keymap
-    };
-
-    static json::JsonTypeFuncs json_keymap_funcs = {
-        json_alloc_keymap,
-        json_copy_keymap,
-    };
-    // clang-format on
-
-
-
+    static json::JsonObjectTypeDeclr<keymap_t> json_keymap("keymap");
 
     // --------------------------------------------------------------------------------------------------------------------------
     // --------------------------------------------------------------------------------------------------------------------------
-    // clang-format off
-    static keycode_t s_default_keycode;
-
-    static json::JsonFieldDescr s_members_keycode[] = {
-        json::JsonFieldDescr("code", s_default_keycode.m_code),
-        json::JsonFieldDescr("codes", s_default_keycode.m_codes, s_default_keycode.m_nb_codes),
-        json::JsonFieldDescr("normal", s_default_keycode.m_normal),
-        json::JsonFieldDescr("shifted", s_default_keycode.m_shifted),
-        json::JsonFieldDescr("icon", s_default_keycode.m_icon),
-        json::JsonFieldDescr("descr", s_default_keycode.m_descr)
-    };
-
-    static void json_alloc_keycode(json::JsonAllocator* alloc, s32 n, void*& ptr) 
+    template <> void json::JsonObjectTypeRegisterFields<keycode_t>(keycode_t& base, json::JsonFieldDescr*& members, s32& member_count)
     {
-        ptr = nullptr;
-        if (n == 1) {
-            ptr = alloc->Allocate<keycode_t>();
-            new (ptr) keycode_t();
-        } else if (n > 1) {
-            ptr = alloc->AllocateArray<keycode_t>(n); 
-            
-            char* mem = (char*)ptr;
-            for (s32 i = 0; i < n; ++i)
-            {
-                new (mem + i * sizeof(keycode_t)) keycode_t();
-            }            
-        }
+        // clang-format off
+        static json::JsonFieldDescr s_members[] = {
+            json::JsonFieldDescr("code", base.m_code),
+            json::JsonFieldDescr("codes", base.m_codes, base.m_nb_codes),
+            json::JsonFieldDescr("normal", base.m_normal),
+            json::JsonFieldDescr("shifted", base.m_shifted),
+            json::JsonFieldDescr("icon", base.m_icon),
+            json::JsonFieldDescr("descr", base.m_descr)
+        };
+        // clang-format on
+        members      = s_members;
+        member_count = sizeof(s_members) / sizeof(json::JsonFieldDescr);
     }
-    static void json_copy_keycode(void* dst, s32 dst_index, void* src ) { ((keycode_t*)dst)[dst_index] = *(keycode_t*)src; }
+    static json::JsonObjectTypeDeclr<keycode_t> json_keycode("keycode");
 
-    static json::JsonTypeDescr json_keycode = 
+    template <> void json::JsonObjectTypeRegisterFields<keycodes_t>(keycodes_t& base, json::JsonFieldDescr*& members, s32& member_count)
     {
-        "keycode",
-        &s_default_keycode, 
-        sizeof(keycode_t),
-        ALIGNOF(keycode_t),
-        sizeof(s_members_keycode) / sizeof(json::JsonFieldDescr), 
-        s_members_keycode
-    };
-
-    static json::JsonTypeFuncs json_keycode_funcs = {
-        json_alloc_keycode,
-        json_copy_keycode,
-    };
-    // clang-format on
-
-    // clang-format off
-    static keycodes_t s_default_keycodes;
-
-    static json::JsonFieldDescr s_members_keycodes[] = {
-        json::JsonFieldDescr("keycodes", s_default_keycodes.m_keycodes, s_default_keycodes.m_nb_keycodes, json_keycode_funcs, json_keycode), 
-    };
-
-    static void json_alloc_keycodes(json::JsonAllocator* alloc, s32 n, void*& ptr) 
-    {
-        ptr = nullptr;
-        if (n == 1) {
-            ptr = alloc->Allocate<keycodes_t>();
-            new (ptr) keycodes_t();
-        } else if (n > 1) {
-            ptr = alloc->AllocateArray<keycodes_t>(n); 
-            
-            char* mem = (char*)ptr;
-            for (s32 i = 0; i < n; ++i)
-            {
-                new (mem + i * sizeof(keycodes_t)) keycodes_t();
-            }            
-        }
+        // clang-format off
+        static json::JsonFieldDescr s_members[] = {
+            json::JsonFieldDescr("keycodes", base.m_keycodes, base.m_nb_keycodes, json_keycode), 
+        };
+        // clang-format on
+        members      = s_members;
+        member_count = sizeof(s_members) / sizeof(json::JsonFieldDescr);
     }
-    static void json_copy_keycodes(void* dst, s32 dst_index, void* src ) { ((keycodes_t*)dst)[dst_index] = *(keycodes_t*)src; }
+    static json::JsonObjectTypeDeclr<keycodes_t> json_keycodes("keycodes");
 
-    static json::JsonTypeDescr json_keycodes = 
+    struct skeycodes_t
     {
-        "keycodes",
-        &s_default_keycodes, 
-        sizeof(keycodes_t),
-        ALIGNOF(keycodes_t),
-        sizeof(s_members_keycode) / sizeof(json::JsonFieldDescr), 
-        s_members_keycodes
-    };
-
-    static json::JsonTypeFuncs json_keycodes_funcs = {
-        json_alloc_keycodes,
-        json_copy_keycodes,
-    };
-    // clang-format on
-
-    struct keycodes_rt_t
-    {
-        keycodes_rt_t()
+        skeycodes_t()
             : kbdb_filename("kbdb/keycodes.json")
             , main_allocator_size(4 * 1024 * 1024)
             , scratch_allocator_size(4 * 1024 * 1024)
         {
-
-            main1_allocator_memory   = nullptr;
-            main2_allocator_memory   = nullptr;
             scratch_allocator_memory = nullptr;
             main_allocator_memory    = nullptr;
         }
@@ -614,8 +388,6 @@ namespace xcore
         const char* const kbdb_filename;
         xcore::u32 const  main_allocator_size;
         xcore::u32 const  scratch_allocator_size;
-        void*             main1_allocator_memory;
-        void*             main2_allocator_memory;
         void*             scratch_allocator_memory;
         void*             main_allocator_memory;
 
@@ -623,30 +395,42 @@ namespace xcore
         time_t      last_file_poll;
     };
 
-    static keycodes_rt_t g_kcdb;
+    static skeycodes_t s_kcdb;
 
     void init_keycodes()
     {
         // Allocate memory for the main and scratch allocators
         //
-        g_kcdb.last_file_poll = time(nullptr);
+        s_kcdb.last_file_poll = time(nullptr);
 
-        g_kcdb.main1_allocator_memory   = ::malloc(g_kcdb.main_allocator_size);
-        g_kcdb.main2_allocator_memory   = ::malloc(g_kcdb.main_allocator_size);
-        g_kcdb.scratch_allocator_memory = ::malloc(g_kcdb.scratch_allocator_size);
-        g_kcdb.main_allocator_memory    = g_kcdb.main1_allocator_memory;
+        s_kcdb.main_allocator_memory    = ::malloc(s_kcdb.main_allocator_size);
+        s_kcdb.scratch_allocator_memory = ::malloc(s_kcdb.scratch_allocator_size);
+    }
+
+    void exit_keycodes()
+    {
+        if (s_kcdb.main_allocator_memory)
+        {
+            ::free(s_kcdb.main_allocator_memory);
+            s_kcdb.main_allocator_memory = nullptr;
+        }
+        if (s_kcdb.scratch_allocator_memory)
+        {
+            ::free(s_kcdb.scratch_allocator_memory);
+            s_kcdb.scratch_allocator_memory = nullptr;
+        }
     }
 
     bool load_keycodes(keycodes_t const*& _kcds)
     {
-        stat(g_kcdb.kbdb_filename, &g_kcdb.kbdb_file_state);
+        stat(s_kcdb.kbdb_filename, &s_kcdb.kbdb_file_state);
 
         // load the file fully in memory
         // open the file
-        FILE* f = fopen(g_kcdb.kbdb_filename, "rb");
+        FILE* f = fopen(s_kcdb.kbdb_filename, "rb");
         if (!f)
         {
-            printf("failed to open file %s\n", g_kcdb.kbdb_filename);
+            printf("failed to open file %s\n", s_kcdb.kbdb_filename);
             return false;
         }
 
@@ -656,10 +440,10 @@ namespace xcore
         fseek(f, 0, SEEK_SET);
 
         json::JsonAllocator alloc;
-        alloc.Init(g_kcdb.main_allocator_memory, g_kcdb.main_allocator_size, "JSON allocator");
+        alloc.Init(s_kcdb.main_allocator_memory, s_kcdb.main_allocator_size, "JSON allocator");
 
         json::JsonAllocator scratch;
-        scratch.Init(g_kcdb.scratch_allocator_memory, g_kcdb.scratch_allocator_size, "JSON scratch allocator");
+        scratch.Init(s_kcdb.scratch_allocator_memory, s_kcdb.scratch_allocator_size, "JSON scratch allocator");
 
         // allocate the buffer
         char* kcds_json = scratch.AllocateArray<char>(kcds_json_len + 1);

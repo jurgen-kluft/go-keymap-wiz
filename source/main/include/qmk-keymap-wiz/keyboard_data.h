@@ -132,6 +132,7 @@ namespace xcore
     void get_color(ImVec4 const& c, u8* color);
 
     void init_keyboards();
+    void exit_keyboards();
     bool load_keyboards(ckeyboards_t const*& kbs);
     bool reload_keyboards(ckeyboards_t const*& kbs);
 
@@ -159,10 +160,6 @@ namespace xcore
         RALT = 0x20, // applies right Alt to KC_XXXX
         LGUI = 0x40, // applies left GUI (command/win) to KC_XXXX
         RGUI = 0x80, // applies right GUI (command/win) to KC_XXXX
-    };
-
-    enum emod_tap 
-    {
         MT   = 0x100,// 'mod' when held, 'keycode' when tapped 
         OSM  = 0x200, // one-shot modifier
     };
@@ -175,7 +172,7 @@ namespace xcore
 
         const char* m_keycode_str;
         xcore::u16  m_mod;
-        xcore::u16  m_mod_tap;
+        bool        m_mod_tap;
         xcore::u16  m_layer_switch;
         const char* m_layer;
         xcore::u8   m_capcolor[4];
@@ -212,9 +209,8 @@ namespace xcore
 
     // -----------------------------------------------------------------------------------------------------------------
     // -----------------------------------------------------------------------------------------------------------------
-    // Also we have 2 databases used for rendering the keyboards:
-    // - array of keycode strings to text
-    // - array of keycode strings to icons
+    // Also we have a database of keycodes used for rendering the keyboards:
+    // - array of keycodes, text, icons and descriptions
     struct keycode_t
     {
         keycode_t()
@@ -254,6 +250,7 @@ namespace xcore
     };
 
     void init_keycodes();
+    void exit_keycodes();
     bool load_keycodes(keycodes_t const*& _kcds);
 
 } // namespace xcore
