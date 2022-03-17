@@ -121,7 +121,7 @@ namespace xcore
     struct skeyboards_t
     {
         skeyboards_t()
-            : kbdb_filename("kbdb/keyboards.json")
+            : filename("kbdb/keyboards.json")
             , main_allocator_size(1024 * 1024)
             , scratch_allocator_size(1024 * 1024)
         {
@@ -132,7 +132,7 @@ namespace xcore
             main_allocator_memory    = nullptr;
         }
 
-        const char* const kbdb_filename;
+        const char* const filename;
         xcore::u32 const  main_allocator_size;
         xcore::u32 const  scratch_allocator_size;
         void*             main1_allocator_memory;
@@ -140,7 +140,7 @@ namespace xcore
         void*             scratch_allocator_memory;
         void*             main_allocator_memory;
 
-        struct stat kbdb_file_state;
+        struct stat file_state;
         time_t      last_file_poll;
     };
 
@@ -179,14 +179,14 @@ namespace xcore
 
     bool load_keyboards(ckeyboards_t const*& kbs)
     {
-        stat(s_kbds.kbdb_filename, &s_kbds.kbdb_file_state);
+        stat(s_kbds.filename, &s_kbds.file_state);
 
         // load the file fully in memory
         // open the file
-        FILE* f = fopen(s_kbds.kbdb_filename, "rb");
+        FILE* f = fopen(s_kbds.filename, "rb");
         if (!f)
         {
-            printf("failed to open file %s\n", s_kbds.kbdb_filename);
+            printf("failed to open file %s\n", s_kbds.filename);
             return false;
         }
 
@@ -238,9 +238,9 @@ namespace xcore
         if (now - s_kbds.last_file_poll > 1)
         {
             struct stat kbdb_file_state_updated;
-            if (stat(s_kbds.kbdb_filename, &kbdb_file_state_updated) == 0)
+            if (stat(s_kbds.filename, &kbdb_file_state_updated) == 0)
             {
-                if (kbdb_file_state_updated.st_mtime > s_kbds.kbdb_file_state.st_mtime)
+                if (kbdb_file_state_updated.st_mtime > s_kbds.file_state.st_mtime)
                 {
                     if (s_kbds.main_allocator_memory == s_kbds.main1_allocator_memory)
                     {
@@ -251,7 +251,7 @@ namespace xcore
                         s_kbds.main_allocator_memory = s_kbds.main1_allocator_memory;
                     }
 
-                    s_kbds.kbdb_file_state = kbdb_file_state_updated;
+                    s_kbds.file_state = kbdb_file_state_updated;
 
                     ckeyboards_t const* kbs_reloaded = nullptr;
                     if (load_keyboards(kbs_reloaded))
@@ -343,6 +343,19 @@ namespace xcore
     }
     static json::JsonObjectTypeDeclr<keymap_t> json_keymap("keymap");
 
+
+    template <> void json::JsonObjectTypeRegisterFields<keymaps_t>(keymaps_t& base, json::JsonFieldDescr*& members, s32& member_count)
+    {
+        // clang-format off
+        static json::JsonFieldDescr s_members[] = {
+            json::JsonFieldDescr("keymaps", base.m_keymaps, base.m_nb_keymaps, json_keymap),
+        };
+        // clang-format on
+        members      = s_members;
+        member_count = sizeof(s_members) / sizeof(json::JsonFieldDescr);
+    }
+    static json::JsonObjectTypeDeclr<keymaps_t> json_keymaps("keymaps");
+
     // --------------------------------------------------------------------------------------------------------------------------
     // --------------------------------------------------------------------------------------------------------------------------
     template <> void json::JsonObjectTypeRegisterFields<keycode_t>(keycode_t& base, json::JsonFieldDescr*& members, s32& member_count)
@@ -377,7 +390,7 @@ namespace xcore
     struct skeycodes_t
     {
         skeycodes_t()
-            : kbdb_filename("kbdb/keycodes.json")
+            : filename("kbdb/keycodes.json")
             , main_allocator_size(4 * 1024 * 1024)
             , scratch_allocator_size(4 * 1024 * 1024)
         {
@@ -385,13 +398,13 @@ namespace xcore
             main_allocator_memory    = nullptr;
         }
 
-        const char* const kbdb_filename;
+        const char* const filename;
         xcore::u32 const  main_allocator_size;
         xcore::u32 const  scratch_allocator_size;
         void*             scratch_allocator_memory;
         void*             main_allocator_memory;
 
-        struct stat kbdb_file_state;
+        struct stat file_state;
         time_t      last_file_poll;
     };
 
@@ -423,14 +436,14 @@ namespace xcore
 
     bool load_keycodes(keycodes_t const*& _kcds)
     {
-        stat(s_kcdb.kbdb_filename, &s_kcdb.kbdb_file_state);
+        stat(s_kcdb.filename, &s_kcdb.file_state);
 
         // load the file fully in memory
         // open the file
-        FILE* f = fopen(s_kcdb.kbdb_filename, "rb");
+        FILE* f = fopen(s_kcdb.filename, "rb");
         if (!f)
         {
-            printf("failed to open file %s\n", s_kcdb.kbdb_filename);
+            printf("failed to open file %s\n", s_kcdb.filename);
             return false;
         }
 
@@ -474,6 +487,111 @@ namespace xcore
         _kcds = kcds;
         return ok;
     }
+
+
+    struct skeymaps_t
+    {
+        skeymaps_t()
+            : filename("keymaps/jurgen.json")
+            , main_allocator_size(4 * 1024 * 1024)
+            , scratch_allocator_size(4 * 1024 * 1024)
+        {
+            scratch_allocator_memory = nullptr;
+            main_allocator_memory    = nullptr;
+        }
+
+        const char* const filename;
+        xcore::u32 const  main_allocator_size;
+        xcore::u32 const  scratch_allocator_size;
+        void*             scratch_allocator_memory;
+        void*             main_allocator_memory;
+
+        struct stat file_state;
+        time_t      last_file_poll;
+    };
+
+    static skeymaps_t s_keymaps;
+
+    void init_keymaps()
+    {
+        // Allocate memory for the main and scratch allocators
+        //
+        s_keymaps.last_file_poll = time(nullptr);
+
+        s_keymaps.main_allocator_memory    = ::malloc(s_keymaps.main_allocator_size);
+        s_keymaps.scratch_allocator_memory = ::malloc(s_keymaps.scratch_allocator_size);
+    }
+
+    void exit_keymaps()
+    {
+        if (s_keymaps.main_allocator_memory)
+        {
+            ::free(s_keymaps.main_allocator_memory);
+            s_keymaps.main_allocator_memory = nullptr;
+        }
+        if (s_keymaps.scratch_allocator_memory)
+        {
+            ::free(s_keymaps.scratch_allocator_memory);
+            s_keymaps.scratch_allocator_memory = nullptr;
+        }
+    }
+
+    bool load_keymaps(keymaps_t const*& _keymaps)
+    {
+        stat(s_keymaps.filename, &s_keymaps.file_state);
+
+        // load the file fully in memory
+        // open the file
+        FILE* f = fopen(s_keymaps.filename, "rb");
+        if (!f)
+        {
+            printf("failed to open file %s\n", s_keymaps.filename);
+            return false;
+        }
+
+        // get the file size
+        fseek(f, 0, SEEK_END);
+        s32 const kcds_json_len = ftell(f);
+        fseek(f, 0, SEEK_SET);
+
+        json::JsonAllocator alloc;
+        alloc.Init(s_keymaps.main_allocator_memory, s_keymaps.main_allocator_size, "JSON allocator");
+
+        json::JsonAllocator scratch;
+        scratch.Init(s_keymaps.scratch_allocator_memory, s_keymaps.scratch_allocator_size, "JSON scratch allocator");
+
+        // allocate the buffer
+        char* kcds_json = scratch.AllocateArray<char>(kcds_json_len + 1);
+        if (!kcds_json)
+        {
+            printf("failed to allocate %d bytes for the keyboard json\n", kcds_json_len);
+            alloc.Reset();
+            scratch.Reset();
+            fclose(f);
+            return false;
+        }
+
+        // read the file
+        fread(kcds_json, 1, kcds_json_len, f);
+        fclose(f);
+
+        keymaps_t* keymaps = alloc.Allocate<keymaps_t>();
+        new (keymaps) keymaps_t();
+
+        json::JsonObject json_root;
+        json_root.m_descr    = &json_keymaps;
+        json_root.m_instance = keymaps;
+
+        char const* error_message = nullptr;
+        bool        ok            = json::JsonDecode((const char*)kcds_json, (const char*)kcds_json + kcds_json_len, json_root, &alloc, &scratch, error_message);
+
+        scratch.Reset();
+        _keymaps = keymaps;
+        return ok;
+    }
+
+
+
 
 } // namespace xcore
 

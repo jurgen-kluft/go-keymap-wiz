@@ -207,6 +207,24 @@ namespace xcore
         layer_t*   m_layers;
     };
 
+    struct keymaps_t
+    {
+        keymaps_t()
+        {
+            m_nb_keymaps = 0;
+            m_keymaps    = nullptr;
+        }
+
+        XCORE_CLASS_PLACEMENT_NEW_DELETE
+
+        xcore::s32 m_nb_keymaps;
+        keymap_t*   m_keymaps;
+    };
+
+    void init_keymaps();
+    void exit_keymaps();
+    bool load_keymaps(keymaps_t const*& _keymaps);
+
     // -----------------------------------------------------------------------------------------------------------------
     // -----------------------------------------------------------------------------------------------------------------
     // Also we have a database of keycodes used for rendering the keyboards:
