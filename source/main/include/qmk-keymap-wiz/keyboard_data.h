@@ -266,6 +266,7 @@ namespace xcore
         xcore::s32 m_nb_keycodes;
         keycode_t* m_keycodes;
     };
+    keycode_t const* find_keycode(keycodes_t const* keycodesDB, const char* keycode_str);
 
     void init_keycodes();
     void exit_keycodes();

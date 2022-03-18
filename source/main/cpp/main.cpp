@@ -117,17 +117,29 @@ int main(int, char**)
     // Our state
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
-    xcore::ckeyboards_t const* keebs = nullptr;
+    // Keycode database
+    xcore::keycodes_t const* kcDB;
+    xcore::init_keycodes();
+    xcore::load_keycodes(kcDB);
+
+    // Keyboard database
+    xcore::ckeyboards_t const* kbDB = nullptr;
     xcore::init_keyboards();
-    xcore::load_keyboards(keebs);
-    xcore::ckeyboard_t const* kb = &keebs->m_keyboards[0];
+    xcore::load_keyboards(kbDB);
+
+    // Currently hardcoded loading of keymaps
+    xcore::keymaps_t const* keymaps;
+    xcore::init_keymaps();
+    xcore::load_keymaps(keymaps);
+    xcore::keymap_t const* km = &keymaps->m_keymaps[0];
+
 
     // Main loop
     while (!glfwWindowShouldClose(window))
     {
-        if (xcore::reload_keyboards(keebs))
+        if (xcore::reload_keyboards(kbDB))
         {
-            kb = &keebs->m_keyboards[0];
+            
         }
 
         // Poll and handle events (inputs, window resize, etc.)
@@ -197,14 +209,6 @@ int main(int, char**)
 
             ImGui::EndChildFrame();
 
-            static ImVector<int> active_tabs;
-            static int           next_tab_id = 0;
-            if (next_tab_id == 0) // Initialize with some default tabs
-            {
-                for (int i = 0; i < 3; i++)
-                    active_tabs.push_back(next_tab_id++);
-            }
-
             static bool             show_leading_button  = true;
             static bool             show_trailing_button = true;
             static ImGuiTabBarFlags tab_bar_flags        = ImGuiTabBarFlags_AutoSelectNewTabs | ImGuiTabBarFlags_FittingPolicyResizeDown;
@@ -224,13 +228,16 @@ int main(int, char**)
                 }
 
                 if (ImGui::TabItemButton("+", ImGuiTabItemFlags_Trailing | ImGuiTabItemFlags_NoTooltip))
-                    active_tabs.push_back(next_tab_id++); // Add new tab
+                {
+                    // create a new layer?
+                    //active_tabs.push_back(next_tab_id++); // Add new tab
+                }
 
                 // Submit our regular tabs
-                for (int n = 0; n < active_tabs.Size; n++)
+                for (int n = 0; n < km->m_nb_layers; n++)
                 {
                     char name[16];
-                    snprintf(name, IM_ARRAYSIZE(name), "%04d", active_tabs[n]);
+                    snprintf(name, IM_ARRAYSIZE(name), "%s", km->m_layers[n].m_name);
                     if (ImGui::BeginTabItem(name))
                     {
                         ImVec2 p = ImGui::GetCursorScreenPos();
@@ -238,7 +245,7 @@ int main(int, char**)
                         ImDrawList* draw_list = ImGui::GetWindowDrawList();
                         draw_list->AddRectFilled(ImVec2(p.x, p.y), ImVec2(p.x + frameSize.x, p.y + frameSize.y), tabkgrndcolor, 0, ImDrawFlags_RoundCornersAll);
 
-                        keyboard_render(kb, p.x, p.y, io.MousePos.x, io.MousePos.y, io.FontGlobalScale);
+                        keyboard_render(&kbDB->m_keyboards[0], kcDB, km, n, p.x, p.y, io.MousePos.x, io.MousePos.y, io.FontGlobalScale);
 
                         ImGui::EndTabItem();
                     }
@@ -271,6 +278,10 @@ int main(int, char**)
         // glfwSetWindowPos( window, ((int)winSize.x) / 2, ((int)winSize.y) / 2 );
         glfwSetWindowSize(window, (int)winSize.x, (int)winSize.y); // Resize
     }
+
+    void exit_keycodes();
+    void exit_keyboards();
+    void exit_keymaps();
 
     // Cleanup
     ImGui_ImplOpenGL3_Shutdown();

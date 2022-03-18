@@ -288,13 +288,16 @@ namespace xcore
         copy(m_ledcolor, sColorBlue);
     }
 
+    static const char* enum_mod_strs[] = {"LShift", "RShift", "LCtrl", "RCtrl", "LAlt", "RAlt", "LCmd", "RCmd", "MT", "OSM", nullptr};
+    static json::JsonEnumTypeDef json_key_mod_enum("key_mod_enum", sizeof(u16), ALIGNOF(u16), enum_mod_strs);
+
     template <> void json::JsonObjectTypeRegisterFields<key_t>(key_t& base, json::JsonFieldDescr*& members, s32& member_count)
     {
         // clang-format off
         static json::JsonFieldDescr s_members[] = 
         {
             json::JsonFieldDescr("keycode", base.m_keycode_str),       
-            json::JsonFieldDescr("mod", base.m_mod),     
+            json::JsonFieldDescr("mod", base.m_mod, json_key_mod_enum),
             json::JsonFieldDescr("mod_tap", base.m_mod_tap),
             json::JsonFieldDescr("layer_switch", base.m_layer_switch), 
             json::JsonFieldDescr("layer", base.m_layer), 
@@ -323,7 +326,9 @@ namespace xcore
         static json::JsonFieldDescr s_members[] = {
             json::JsonFieldDescr("name", base.m_name),
             json::JsonFieldDescr("index", base.m_index),
-            json::JsonFieldDescr("keys", base.m_keys, base.m_nb_keys, json_key),
+            json::JsonFieldDescr("cap_color", base.m_capcolor, 4),
+            json::JsonFieldDescr("led_color", base.m_ledcolor, 4),
+            json::JsonFieldDescr("keymap", base.m_keys, base.m_nb_keys, json_key),
         };
         // clang-format on
         members      = s_members;
@@ -342,7 +347,6 @@ namespace xcore
         member_count = sizeof(s_members) / sizeof(json::JsonFieldDescr);
     }
     static json::JsonObjectTypeDeclr<keymap_t> json_keymap("keymap");
-
 
     template <> void json::JsonObjectTypeRegisterFields<keymaps_t>(keymaps_t& base, json::JsonFieldDescr*& members, s32& member_count)
     {
@@ -386,6 +390,25 @@ namespace xcore
         member_count = sizeof(s_members) / sizeof(json::JsonFieldDescr);
     }
     static json::JsonObjectTypeDeclr<keycodes_t> json_keycodes("keycodes");
+
+    keycode_t const* find_keycode(keycodes_t const* keycodesDB, const char* keycode_str)
+    {
+        if (keycodesDB != nullptr)
+        {
+            for (s32 i = 0; i < keycodesDB->m_nb_keycodes; ++i)
+            {
+                keycode_t const* keycode = &keycodesDB->m_keycodes[i];
+                if (strcmp(keycode->m_code, keycode_str) == 0)
+                    return keycode;
+                for (s32 j = 0; j < keycode->m_nb_codes; ++j)
+                {
+                    if (strcmp(keycode->m_codes[j], keycode_str) == 0)
+                        return keycode;
+                }
+            }
+        }
+        return &keycodesDB->m_keycodes[0];
+    }
 
     struct skeycodes_t
     {
@@ -477,7 +500,7 @@ namespace xcore
         new (kcds) keycodes_t();
 
         json::JsonObject json_root;
-        json_root.m_descr    = &json_ckeyboards;
+        json_root.m_descr    = &json_keycodes;
         json_root.m_instance = kcds;
 
         char const* error_message = nullptr;
@@ -487,7 +510,6 @@ namespace xcore
         _kcds = kcds;
         return ok;
     }
-
 
     struct skeymaps_t
     {
@@ -589,9 +611,6 @@ namespace xcore
         _keymaps = keymaps;
         return ok;
     }
-
-
-
 
 } // namespace xcore
 

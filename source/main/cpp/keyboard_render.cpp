@@ -185,12 +185,12 @@ void keyboard_loadfonts()
 
 }
 
-static void key_render(xcore::ckeyboard_t const* kb, xcore::ckeygroup_t const& kg, xcore::ckey_t const& key, float globalscale, float x, float y, float r, bool highlight)
+static void key_render(xcore::ckeyboard_t const* kb, xcore::ckeygroup_t const& kg, xcore::ckey_t const& ckey, xcore::keycodes_t const* kcDB, xcore::keymap_t const* km, xcore::s32 kml, float globalscale, float x, float y, float r, bool highlight)
 {
-    const float sw       = key.m_sw * kg.m_sw * kb->m_sw * kb->m_scale * globalscale;
-    const float sh       = key.m_sh * kg.m_sh * kb->m_sh * kb->m_scale * globalscale;
-    const float kw       = (key.m_w * kg.m_w * kb->m_w * kb->m_scale * globalscale) - (2 * sw);
-    const float kh       = (key.m_h * kg.m_h * kb->m_h * kb->m_scale * globalscale) - (2 * sh);
+    const float sw       = ckey.m_sw * kg.m_sw * kb->m_sw * kb->m_scale * globalscale;
+    const float sh       = ckey.m_sh * kg.m_sh * kb->m_sh * kb->m_scale * globalscale;
+    const float kw       = (ckey.m_w * kg.m_w * kb->m_w * kb->m_scale * globalscale) - (2 * sw);
+    const float kh       = (ckey.m_h * kg.m_h * kb->m_h * kb->m_scale * globalscale) - (2 * sh);
     const float rounding = kw / sw;
     const float hw       = kw / 2;
     const float hh       = kh / 2;
@@ -207,12 +207,12 @@ static void key_render(xcore::ckeyboard_t const* kb, xcore::ckeygroup_t const& k
     if (kg.m_ledcolor)
         ledcolor = kg.m_ledcolor;
 
-    if (key.m_capcolor)
-        capcolor = key.m_capcolor;
-    if (key.m_txtcolor)
-        txtcolor = key.m_txtcolor;
-    if (key.m_ledcolor)
-        ledcolor = key.m_ledcolor;
+    if (ckey.m_capcolor)
+        capcolor = ckey.m_capcolor;
+    if (ckey.m_txtcolor)
+        txtcolor = ckey.m_txtcolor;
+    if (ckey.m_ledcolor)
+        ledcolor = ckey.m_ledcolor;
 
     ImVec4 dkeycapcolor(capcolor);
     ImVec4 dkeyledcolor(ledcolor);
@@ -241,7 +241,17 @@ static void key_render(xcore::ckeyboard_t const* kb, xcore::ckeygroup_t const& k
         draw_list->AddRect(ImVec2(x - (hw - (th / 4.0f)), y - (hh - (th / 4.0f))), ImVec2(x + (hw - (th / 4.0f)), y + (hh - (th / 4.0f))), (rkeyhltcolor), rounding, ImDrawFlags_None, th / 2.0f);
     }
 
-    if (key.m_label != nullptr)
+    xcore::layer_t* layer = &km->m_layers[kml];
+    xcore::key_t* key = &layer->m_keys[ckey.m_index];
+
+    // So here we need to do a search into the keycodes database to find the actual text to display in the key
+    xcore::keycode_t const* keycode = find_keycode(kcDB, key->m_keycode_str);
+
+    const char* key_label = keycode->m_normal;
+    if (key_label == nullptr)
+        key_label = key->m_keycode_str;
+
+    if (key_label != nullptr)
     {
         char  text[128];
         char* lines[4] = {nullptr, nullptr, nullptr, nullptr};
@@ -249,9 +259,9 @@ static void key_render(xcore::ckeyboard_t const* kb, xcore::ckeygroup_t const& k
         int num_lines      = 0;
         int i              = 0;
         lines[num_lines++] = text;
-        while (key.m_label[i] != 0 && num_lines < 4)
+        while (key_label[i] != 0 && num_lines < 4)
         {
-            if (key.m_label[i] == ' ')
+            if (key_label[i] == ' ')
             {
                 text[i]            = 0;
                 lines[num_lines++] = (text + i + 1);
@@ -259,7 +269,7 @@ static void key_render(xcore::ckeyboard_t const* kb, xcore::ckeygroup_t const& k
             }
             else
             {
-                text[i]     = key.m_label[i];
+                text[i]     = key_label[i];
                 text[i + 1] = 0;
             }
             i++;
@@ -267,8 +277,8 @@ static void key_render(xcore::ckeyboard_t const* kb, xcore::ckeygroup_t const& k
 
         if (num_lines == 1)
         {
-            ImVec2 td = SelectFontSize(key.m_label, kw);
-            draw_list->AddText(ImVec2(x - (td.x / 2), y - (td.y / 2)), rkeytxtcolor, key.m_label);
+            ImVec2 td = SelectFontSize(key_label, kw);
+            draw_list->AddText(ImVec2(x - (td.x / 2), y - (td.y / 2)), rkeytxtcolor, key_label);
             ImGui::PopFont();
         }
         else if (num_lines == 2)
@@ -284,13 +294,13 @@ static void key_render(xcore::ckeyboard_t const* kb, xcore::ckeygroup_t const& k
         }
     }
 
-    if (key.m_nob)
+    if (ckey.m_nob)
         draw_list->AddLine(ImVec2(x - (hw * 0.125), y + 0.5f * hh), ImVec2(x + (hw * 0.125), y + 0.5f * hh), ImColor(255, 255, 255, 255), 2);
 
     rotation.Apply(r);
 }
 
-void keyboard_render(xcore::ckeyboard_t const* kb, float posx, float posy, float mousex, float mousey, float globalscale)
+void keyboard_render(xcore::ckeyboard_t const* kb, xcore::keycodes_t const* kcdb, xcore::keymap_t const* km, xcore::s32 l, float posx, float posy, float mousex, float mousey, float globalscale)
 {
     // origin = left/top corner
     float ox = posx + (kb->m_w / 2);
@@ -361,7 +371,7 @@ void keyboard_render(xcore::ckeyboard_t const* kb, float posx, float posy, float
             for (int c = 0; c < kg.m_c; c++)
             {
                 xcore::ckey_t const& kc = kg.m_keys[k++];
-                key_render(kb, kg, kc, globalscale, cx, cy, rrad, kc.m_index == highlighted_key_index);
+                key_render(kb, kg, kc, kcdb, km, l, globalscale, cx, cy, rrad, kc.m_index == highlighted_key_index);
 
                 if (kc.m_index == highlighted_key_index)
                 {
@@ -378,7 +388,10 @@ void keyboard_render(xcore::ckeyboard_t const* kb, float posx, float posy, float
                     // - keymap index
                     const char* test = "Keyboard: %s\nLayer: %s\nLabel: %s\nModifiers: %s\nKeycode: %s\nKeygroup: %s\nKeymap index: %d";
 
-                    ImGui::Text(test, kb->m_name, "QWERTY", kc.m_label, "None", "KC_Q", kg.m_name, kc.m_index);
+                    xcore::layer_t* layer = &km->m_layers[l];
+                    xcore::key_t* key = &layer->m_keys[kc.m_index];
+
+                    ImGui::Text(test, kb->m_name, layer->m_name, kc.m_label, "None", key->m_keycode_str, kg.m_name, kc.m_index);
                     ImGui::PopTextWrapPos();
                     ImGui::EndTooltip();
                 }

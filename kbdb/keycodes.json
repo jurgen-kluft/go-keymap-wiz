@@ -40,9 +40,9 @@
         { "code": "KC_0",                    "codes": ["KC_0"                                          ],  "normal": "0",                    "shifted": ")",              "descr": "0 or Shift )" },
         { "code": "KC_ENT",                  "codes": ["KC_ENTER","KC_ENT"                             ],  "normal": "Return",               "shifted": "",               "descr": "Return (Enter)" },
         { "code": "KC_ESC",                  "codes": ["KC_ESCAPE","KC_ESC"                            ],  "normal": "Escape",               "shifted": "",               "descr": "Escape" },
-        { "code": "KC_BSPC",                 "codes": ["KC_BACKSPACE","KC_BSPC"                        ],  "normal": "Backspace",            "shifted": "",               "descr": "Delete (Backspace)" },
+        { "code": "KC_BSPC",                 "codes": ["KC_BACKSPACE","KC_BSPC"                        ],  "normal": "Back space",           "shifted": "",               "descr": "Delete (Backspace)" },
         { "code": "KC_TAB",                  "codes": ["KC_TAB"                                        ],  "normal": "Tab",                  "shifted": "",               "descr": "Tab" },
-        { "code": "KC_SPC",                  "codes": ["KC_SPACE","KC_SPC"                             ],  "normal": "Spacebar",             "shifted": "",               "descr": "Spacebar" },
+        { "code": "KC_SPC",                  "codes": ["KC_SPACE","KC_SPC"                             ],  "normal": "Space",                "shifted": "",               "descr": "Spacebar" },
         { "code": "KC_MINS",                 "codes": ["KC_MINUS","KC_MINS"                            ],  "normal": "-",                    "shifted": "_",              "descr": "- or Shift _" },
         { "code": "KC_EQL",                  "codes": ["KC_EQUAL","KC_EQL"                             ],  "normal": "=",                    "shifted": "+",              "descr": "= or Shift +" },
         { "code": "KC_LBRC",                 "codes": ["KC_LEFT_BRACKET","KC_LBRC"                     ],  "normal": "[",                    "shifted": "{",              "descr": "[ or Shift {" },
@@ -233,6 +233,23 @@
         { "code": "KC_DQUO",                 "codes": ["KC_DOUBLE_QUOTE","KC_DQUO", "KC_DQT"           ],  "normal": "\"",                   "shifted": "",               "descr": "\"" },
         { "code": "KC_LABK",                 "codes": ["KC_LEFT_ANGLE_BRACKET","KC_LABK", "KC_LT"      ],  "normal": "<",                    "shifted": "",               "descr": "<"},
         { "code": "KC_RABK",                 "codes": ["KC_RIGHT_ANGLE_BRACKET","KC_RABK", "KC_GT"     ],  "normal": ">",                    "shifted": "",               "descr": ">"},
-        { "code": "KC_QUES",                 "codes": ["KC_QUESTION","KC_QUES"                         ],  "normal": "?",                    "shifted": "",               "descr": "?"}
+        { "code": "KC_QUES",                 "codes": ["KC_QUESTION","KC_QUES"                         ],  "normal": "?",                    "shifted": "",               "descr": "?"},
+
+        { "code": "LT_MOS",                  "codes": [ ],                                                 "normal": "Mouse",                "shifted": "",               "descr": "Mouse layer toggle"},
+        { "code": "KC_OS_PDT",               "codes": [ ],                                                 "normal": "Prev Desktop",         "shifted": "",               "descr": "Previous desktop"},
+        { "code": "KC_OS_NDT",               "codes": [ ],                                                 "normal": "Next Desktop",         "shifted": "",               "descr": "Next desktop"},
+        { "code": "OS_CMD",                  "codes": [ ],                                                 "normal": "Cmd",                  "shifted": "",               "descr": "Left Cmd"},
+        { "code": "OS_ALT",                  "codes": [ ],                                                 "normal": "Alt",                  "shifted": "",               "descr": "Left Alt"},
+        { "code": "OS_CTRL",                 "codes": [ ],                                                 "normal": "Ctrl",                 "shifted": "",               "descr": "Left Control"},
+        { "code": "OS_SHFT",                 "codes": [ ],                                                 "normal": "Shift",                "shifted": "",               "descr": "Left Shift"},
+        { "code": "KC_OS_UNDO",              "codes": [ ],                                                 "normal": "Undo",                 "shifted": "",               "descr": "" },
+        { "code": "KC_OS_CUT",               "codes": [ ],                                                 "normal": "Cut",                  "shifted": "",               "descr": "" },
+        { "code": "KC_OS_COPY",              "codes": [ ],                                                 "normal": "Copy",                 "shifted": "",               "descr": "" },
+        { "code": "KC_OS_PASTE",             "codes": [ ],                                                 "normal": "Paste",                "shifted": "",               "descr": "" },
+        { "code": "KC_FCAPS",                "codes": [ ],                                                 "normal": "Smart Caps",           "shifted": "",               "descr": "Smart CAPS key"},
+        { "code": "KC_FNUM",                 "codes": [ ],                                                 "normal": "Smart Num",            "shifted": "",               "descr": "Smart NUM key"},
+        { "code": "KC_FNAV",                 "codes": [ ],                                                 "normal": "Nav",                  "shifted": "",               "descr": "Custom NAV key"},
+        { "code": "KC_FSYM",                 "codes": [ ],                                                 "normal": "Sym",                  "shifted": "",               "descr": "Custom SYM key"}
+        
     ]
 }
